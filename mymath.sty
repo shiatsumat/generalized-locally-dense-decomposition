@@ -1,0 +1,587 @@
+﻿\ProvidesPackage{mymath}
+
+%
+% Note:
+% If you are a Japanese LaTeX user, do like this.
+% \documentclass[dvipdfmx, uplatex]{jsarticle}
+%
+
+\usepackage{silence}
+\WarningsOff[latexfont]
+\WarningsOff[caption]
+\WarningsOff[etex]
+
+\usepackage[hypertexnames=false]{hyperref}
+\hypersetup{
+  pdfborder={0 0 0},
+  colorlinks, breaklinks,
+  bookmarksnumbered, bookmarksopen,
+  urlcolor=[rgb]{.9,.3,.7},
+  linkcolor=[rgb]{.9,.3,.7},
+  citecolor=[rgb]{.0,.7,.0}
+}
+\usepackage{pxjahyper}
+
+\usepackage[left=15mm,right=15mm,head=15mm,foot=15mm]{geometry}
+
+\usepackage{expl3, etoolbox, xparse, xspace}
+\usepackage{makeidx, url, pxrubrica, nameref, natbib, tocbibind}
+% https://tex.stackexchange.com/questions/24136/
+% natbib-and-hyperref-for-author-year-style-produces-two-links
+\pretocmd{\NAT@citex}{%
+  \let\NAT@hyper@\NAT@hyper@citex
+  \def\NAT@postnote{#2}%
+  \setcounter{NAT@total@cites}{0}%
+  \setcounter{NAT@count@cites}{0}%
+  \forcsvlist{\stepcounter{NAT@total@cites}\@gobble}{#3}}{}{}
+\newcounter{NAT@total@cites}
+\newcounter{NAT@count@cites}
+\def\NAT@postnote{}
+% include postnote and \citet closing bracket in hyperlink
+\def\NAT@hyper@citex#1{%
+  \stepcounter{NAT@count@cites}%
+  \hyper@natlinkstart{\@citeb\@extra@b@citeb}#1%
+  \ifnumequal{\value{NAT@count@cites}}{\value{NAT@total@cites}}
+    {\ifNAT@swa\else\if*\NAT@postnote*\else%
+     \NAT@cmt\NAT@postnote\global\def\NAT@postnote{}\fi\fi}{}%
+  \ifNAT@swa\else\if\relax\NAT@date\relax
+  \else\NAT@@close\global\let\NAT@nm\@empty\fi\fi% avoid compact citations
+  \hyper@natlinkend}
+\renewcommand\hyper@natlinkbreak[2]{#1}
+% avoid extraneous postnotes, closing brackets
+\patchcmd{\NAT@citex}
+  {\ifNAT@swa\else\if*#2*\else\NAT@cmt#2\fi
+   \if\relax\NAT@date\relax\else\NAT@@close\fi\fi}{}{}{}
+\patchcmd{\NAT@citex}
+  {\if\relax\NAT@date\relax\NAT@def@citea\else\NAT@def@citea@close\fi}
+  {\if\relax\NAT@date\relax\NAT@def@citea\else\NAT@def@citea@space\fi}{}{}
+\makeatother
+
+\newcommand{\safefootnote}[2]{%
+  \texorpdfstring{#1\protect\footnote{#2}}{#1}%
+}
+
+\usepackage{color, graphicx, tikz-cd, here, tabularx}
+\usepackage{listings, algorithm, algpseudocode, caption}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{magenta}\bfseries,
+  stringstyle=\color{blue},
+  commentstyle=\color{green}\itshape,
+  xleftmargin=20pt, xrightmargin=20pt, frame=single,
+  numbers=left,
+  breaklines=true}
+\captionsetup[algorithm]{labelsep=period}
+\makeatletter
+\newenvironment{algotabular}%
+  {\tabularx{\dimexpr\linewidth-\ALG@thistlm}[t]{@{}X@{}}}%
+  {\endtabularx}
+\makeatother
+
+\usepackage{mathtools}
+\makeatletter
+\renewcommand*{\eqref}[1]{%
+  \hyperref[{#1}]{\textup{\tagform@{\ref*{#1}}}}%
+}
+\makeatother
+\let\openbox\relax
+\usepackage{amsthm, thmtools}
+\usepackage[nameinlink]{cleveref}
+\usepackage{autonum}
+
+\usepackage{newtxtext, newtxmath, bm}
+\usepackage[Symbolsmallscale]{upgreek}
+\makeatletter
+\@ifpackageloaded{stix2}{
+}{
+  \DeclareFontEncoding{LS1}{}{}
+  \DeclareFontEncoding{LS2}{}{\noaccents@}
+  \DeclareFontSubstitution{LS1}{stix2}{m}{n}
+  \DeclareFontSubstitution{LS2}{stix2}{m}{n}
+  \DeclareSymbolFont{stix@symbols2}{LS1}{stix2frak}{m}{n}
+  \DeclareSymbolFont{stix@largesymbols}{LS2}{stix2ex}{m}{n}
+  \SetSymbolFont{stix@largesymbols}{bold}{LS2}{stix2ex}{b}{n}
+  \SetSymbolFont{stix@symbols2}{bold}{LS1}{stix2frak}{b}{n}
+  \DeclareMathDelimiter{\lBrace}{\mathopen}{stix@largesymbols}%
+    {"E8}{stix@largesymbols}{"0E}
+  \DeclareMathDelimiter{\rBrace}{\mathclose}{stix@largesymbols}%
+    {"E9}{stix@largesymbols}{"0F}
+  \DeclareMathDelimiter{\lBrack}{\mathopen}{stix@largesymbols}%
+    {"E0}{stix@largesymbols}{"06}
+  \DeclareMathDelimiter{\rBrack}{\mathclose}{stix@largesymbols}%
+    {"E1}{stix@largesymbols}{"07}
+  \DeclareMathDelimiter{\lAngle}{\mathopen}{stix@largesymbols}%
+    {"EC}{stix@largesymbols}{"12}
+  \DeclareMathDelimiter{\rAngle}{\mathclose}{stix@largesymbols}%
+    {"ED}{stix@largesymbols}{"13}
+  \DeclareMathSymbol{\zcmp}{\mathop}{stix@symbols2}{"EF}
+}
+\makeatother
+\usepackage[scr]{rsfso}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Utility
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ExplSyntaxOn
+\cs_new_eq:NN \Replicate \prg_replicate:nn
+\cs_new_eq:NN \IfThenElse \bool_if:nTF
+\cs_new_eq:NN \CompareInt \int_compare_p:nNn
+\cs_new_eq:NN \IfEqThenElse \token_if_eq_meaning:NNTF
+\ExplSyntaxOff
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graphics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{figcenter}[1][H]{%
+  \begin{figure}[#1]\centering%
+}{%
+  \end{figure}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math Controls
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\allowdisplaybreaks
+\makeatletter
+\def\old@comma{,}
+\catcode`\,=13
+\def,{%
+  \ifmmode%
+    \old@comma\nolinebreak[1]%
+  \else%
+    \old@comma%
+  \fi%
+}
+\makeatother
+
+\newcommand{\mathstyle}[1]{%
+  \mathchoice{{#1}}{{#1}}{{\scriptsize{#1}}}{\tiny{#1}}%
+}
+\newcommand{\mathreflect}[1]{\mathstyle{\reflectbox{\(#1\)}}}
+\newcommand{\mathrotate}[2]{\mathstyle{\rotatebox[origin=c]{#1}{\(#2\)}}}
+\newcommand{\mathraise}[2]{\mathstyle{\raisebox{#1}{\(#2\)}}}
+\newcommand{\mathscale}[3]{\mathstyle{\scalebox{#1}[#2]{\(#3\)}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math Brackets
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\leftright}[4][0]{%
+	\IfThenElse{\CompareInt{#1}={0}}{%
+		\IfEqThenElse{#2}{.}{}{#2}#4%
+		\IfEqThenElse{#3}{.}{}{#3}%
+	}{\IfThenElse{\CompareInt{#1}={1}}{%
+		\bigl#2#4\bigr#3%
+	}{\IfThenElse{\CompareInt{#1}={2}}{%
+		\Bigl#2#4\Bigr#3%
+	}{\IfThenElse{\CompareInt{#1}={3}}{%
+		\biggl#2#4\biggr#3%
+	}{\IfThenElse{\CompareInt{#1}={4}}{%
+		\Biggl#2#4\Biggr#3%
+	}{%
+		\errmessage{leftright: illegal optional argument}%
+	}}}}}%
+}
+\newcommand{\leftmidright}[6][0]{%
+	\IfThenElse{\CompareInt{#1}={0}}{%
+		\IfEqThenElse{#2}{.}{}{#2}#5%
+		\IfEqThenElse{#3}{.}{}{#3}#6%
+		\IfEqThenElse{#4}{.}{}{#4}%
+	}{\IfThenElse{\CompareInt{#1}={1}}{%
+		\bigl#2#5\bigm#3#6\bigr#4%
+	}{\IfThenElse{\CompareInt{#1}={2}}{%
+		\Bigl#2#5\Bigm#3#6\Bigr#4%
+	}{\IfThenElse{\CompareInt{#1}={3}}{%
+		\biggl#2#5\biggm#3#6\biggr#4%
+	}{\IfThenElse{\CompareInt{#1}={4}}{%
+		\Biggl#2#5\Biggm#3#6\Biggr#4%
+	}{%
+		\errmessage{leftmidright: illegal optional argument}%
+	}}}}}%
+}
+
+\newcommand{\parened}[2][0]{\leftright[#1](){#2}}
+\newcommand{\bracketed}[2][0]{\leftright[#1][]{#2}}
+\newcommand{\parenbracketed}[2][0]{\leftright[#1](]{#2}}
+\newcommand{\bracketparened}[2][0]{\leftright[#1][){#2}}
+\newcommand{\braced}[2][0]{\leftright[#1]\{\}{#2}}
+\newcommand{\angled}[2][0]{\leftright[#1]\langle\rangle{#2}}
+\newcommand{\absoluted}[2][0]{\leftright[#1]||{#2}}
+\newcommand{\normed}[2][0]{\leftright[#1]\lVert\rVert{#2}}
+\newcommand{\floored}[2][0]{\leftright[#1]\lfloor\rfloor{#2}}
+\newcommand{\ceiled}[2][0]{\leftright[#1]\lceil\rceil{#2}}
+\newcommand{\Bracketed}[2][0]{\leftright[#1]\lBrack\rBrack{#2}}
+\newcommand{\Braced}[2][0]{\leftright[#1]\lBrace\rBrace{#2}}
+\newcommand{\Angled}[2][0]{\leftright[#1]\lAngle\rAngle{#2}}
+
+\newcommand{\parenedvert}[3][0]{\leftmidright[#1](|){#2}{#3}}
+\newcommand{\bracketedvert}[3][0]{\leftmidright[#1][|]{#2}{#3}}
+\newcommand{\bracedvert}[3][0]{\leftmidright[#1]\{|\}{#2}{#3}}
+\newcommand{\angledvert}[3][0]{\leftmidright[#1]\langle|\rangle{#2}{#3}}
+\newcommand{\Bracketedvert}[3][0]{\leftmidright[#1]\lBrack|\rBrack{#2}{#3}}
+\newcommand{\Bracedvert}[3][0]{\leftmidright[#1]\lBrace|\rBrace{#2}{#3}}
+\newcommand{\Angledvert}[3][0]{\leftmidright[#1]\lAngle|\rAngle{#2}{#3}}
+
+\newcommand{\upperparened}[2][0]{^{\parened[#1]{#2}}}
+\newcommand{\evaluatedat}[2][1]{\,\leftright[#1].|{}_{#2}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Arrows
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\makearrowr}[3][0]{%
+  \mathrel{\Replicate{#1}{#2\joinrel}#3}%
+}
+\newcommand{\makearrowb}[4][0]{%
+  \mathrel{#2\joinrel\Replicate{#1}{#3\joinrel}#4}%
+}
+\newcommand{\makearrowx}[5][0]{%
+  \mathrel{%
+    \IfThenElse{\CompareInt{#1}={0}}{#2}{%
+      #3\joinrel\Replicate{(#1) - 1}{#4\joinrel}#5%
+    }%
+  }%
+}
+
+\renewcommand{\to}[1][0]{\makearrowr[#1]{\relbar}{\rightarrow}}
+\newcommand{\ot}[1][0]{\mathrel{\mathreflect{\to[#1]}}}
+\newcommand{\To}[1][0]{\makearrowr[#1]{\Relbar}{\Rightarrow}}
+\newcommand{\oT}[1][0]{\mathrel{\mathreflect{\oT[#1]}}}
+
+\newcommand{\tot}[1][0]{%
+  \makearrowx[#1]{\leftrightarrow}{\leftarrow}{\relbar}{\rightarrow}%
+}
+\newcommand{\ToT}[1][0]{%
+  \makearrowx[#1]{\Leftrightarrow}{\Leftarrow}{\Relbar}{\Rightarrow}%
+}
+
+\let\oldmapsto\mapsto
+\renewcommand{\mapsto}[1][0]{%
+  \makearrowx[#1]{\oldmapsto}{\vdash}{\relbar}{\rightarrow}%
+}
+\newcommand{\mapsot}[1][0]{\mathrel{\mathreflect{\mapsto[#1]}}}
+\newcommand{\mapsTo}[1][0]{%
+  \makearrowb[#1]{%
+    \mathrel{\mathrms{0.23ex}{\mathscale{1}{0.6}{\mid}}\mkern-1mu}%
+  }{\Relbar}{\Rightarrow}%
+}
+\newcommand{\mapsoT}[1][0]{\mathrel{\mathreflect{\Mapsto[#1]}}}
+
+\newcommand{\partto}[1][0]{\makearrowr[#1]{\relbar}{\rightharpoonup}}
+\newcommand{\partot}[1][0]{\mathrel{\mathreflect{\partto[#1]}}}
+
+\newcommand{\monicto}[1][0]{\makearrowb[#1]{\lhook}{\relbar}{\rightarrow}}
+\newcommand{\monicot}[1][0]{\mathrel{\mathreflect{\monicto[#1]}}}
+
+\newcommand{\epicto}[1][0]{%
+  \makearrowr[#1]{\relbar}{\rightarrow\kern-1.8ex\rightarrow}%
+}
+\newcommand{\epicot}[1][0]{\mathrel{\mathreflect{\epicto[#1]}}}
+
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\otot}{\leftleftarrows}
+\newcommand{\toot}{\rightleftarrows}
+\newcommand{\otto}{\leftrightarrows}
+
+\newcommand{\upto}[1][0]{\mathrel{\mathrotate{90}{\to[#1]}}}
+\newcommand{\upTo}[1][0]{\mathrel{\mathrotate{90}{\To[#1]}}}
+\newcommand{\downto}[1][0]{\mathrel{\mathrotate{-90}{\to[#1]}}}
+\newcommand{\downTo}[1][0]{\mathrel{\mathrotate{-90}{\To[#1]}}}
+\newcommand{\upleftto}[1][0]{\mathrel{\mathrotate{135}{\to[#1]}}}
+\newcommand{\upleftTo}[1][0]{\mathrel{\mathrotate{135}{\To[#1]}}}
+\newcommand{\uprightto}[1][0]{\mathrel{\mathrotate{45}{\to[#1]}}}
+\newcommand{\uprightTo}[1][0]{\mathrel{\mathrotate{45}{\To[#1]}}}
+\newcommand{\downleftto}[1][0]{\mathrel{\mathrotate{-135}{\to[#1]}}}
+\newcommand{\downleftTo}[1][0]{\mathrel{\mathrotate{-135}{\To[#1]}}}
+\newcommand{\downrightto}[1][0]{\mathrel{\mathrotate{-45}{\to[#1]}}}
+\newcommand{\downrightTo}[1][0]{\mathrel{\mathrotate{-45}{\To[#1]}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abbreviations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math Brackets
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\p}[2][0]{\parened[#1]{#2}}
+\renewcommand{\b}[2][0]{\bracketed[#1]{#2}} % \b used to be a diacritic
+\newcommand{\pb}[2][0]{\parenbracketed[#1]{#2}}
+\newcommand{\bp}[2][0]{\bracketparened[#1]{#2}}
+\renewcommand{\c}[2][0]{\braced[#1]{#2}} % \c used to be a diacritic
+\newcommand{\g}[2][0]{\angled[#1]{#2}}
+\renewcommand{\t}[2][0]{\absoluted[#1]{#2}} % \t used to be a diacritic
+\newcommand{\n}[2][0]{\normed[#1]{#2}}
+\newcommand{\f}[2][0]{\floored[#1]{#2}}
+\renewcommand{\l}[2][0]{\ceiled[#1]{#2}} % \l used to be a special character
+\newcommand{\bb}[2][0]{\Bracketed[#1]{#2}}
+\newcommand{\cc}[2][0]{\Braced[#1]{#2}}
+\newcommand{\gc}[2][0]{\Angled[#1]{#2}}
+
+\newcommand{\pv}[3][0]{\parenedvert[#1]{#2}{#3}}
+\newcommand{\bv}[3][0]{\bracketedvert[#1]{#2}{#3}}
+\newcommand{\cv}[3][0]{\bracedvert[#1]{#2}{#3}}
+\newcommand{\gv}[3][0]{\angledvert[#1]{#2}{#3}}
+\newcommand{\bbv}[3][0]{\Bracketedvert[#1]{#2}{#3}}
+\newcommand{\ccv}[3][0]{\Bracedvert[#1]{#2}{#3}}
+\newcommand{\gcv}[3][0]{\Angledvert[#1]{#2}{#3}}
+
+\newcommand{\up}[2][0]{\upperparened[#1]{#2}}
+\newcommand{\ev}[2][1]{\evaluatedat[#1]{#2}}
+
+\newcommand{\set}[3][0]{\bracedvert[#1]{\,#2\ }{\ #3\,}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Characters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\alp}{\alpha}
+\newcommand{\bt}{\beta}
+\newcommand{\gm}{\gamma}
+\newcommand{\Gm}{\Gamma}
+\newcommand{\dlt}{\delta}
+\newcommand{\Dlt}{\Delta}
+\newcommand{\eps}{\epsilon}
+\newcommand{\zt}{\zeta}
+% eta
+\newcommand{\tht}{\theta}
+\newcommand{\vtht}{\vartheta}
+\renewcommand{\it}{\iota}
+\newcommand{\kp}{\kappa}
+\newcommand{\lmd}{\lambda}
+\newcommand{\Lmd}{\Lambda}
+% mu
+% nu
+% xi
+% pi
+\newcommand{\vpi}{\varpi}
+% Pi
+% rho
+\newcommand{\vrho}{\vrho}
+\newcommand{\sgm}{\sigma}
+\newcommand{\vsgm}{\varsigma}
+\newcommand{\Sgm}{\Sigma}
+% tau
+\newcommand{\ups}{\upsilon}
+\newcommand{\Ups}{\Upsilon}
+% phi
+\newcommand{\vphi}{\varphi}
+% Phi
+% chi
+% psi
+% Psi
+\newcommand{\omg}{\omega}
+\newcommand{\Omg}{\Omega}
+
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\NNc}{\hat{\mathbb{N}}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\ZZc}{\hat{\mathbb{Z}}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\QQc}{\hat{\mathbb{Q}}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\RRc}{\hat{\mathbb{R}}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\CCc}{\hat{\mathbb{C}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Everyday Logic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\defeq}{\mathrel{\vcentcolon=}}
+\newcommand{\eqdef}{\mathrel{=\vcentcolon}}
+\renewcommand{\iff}{\ensuremath{\mathrel{\Longleftrightarrow}}\xspace}
+\newcommand{\defiff}{\ensuremath{\mathrel{\vcentcolon\iff}}}
+\newcommand{\iffdef}{\ensuremath{\mathrel{\iff\vcentcolon}}}
+\renewcommand{\implies}{\ensuremath{\mathrel{\Longrightarrow}}\xspace}
+\renewcommand{\impliedby}{\ensuremath{\mathrel{\Longleftarrow}}\xspace}
+\renewcommand{\land}{\mathrel{\mathrm{and}}}
+\renewcommand{\lor}{\mathrel{\mathrm{or}}}
+
+\newcommand{\when}{\mathrel{\mathrm{when}}}
+\newcommand{\otherwise}{\mathrel{\mathrm{otherwise}}}
+
+\newcommand{\ex}[1]{\mathrel{\underset{\to}{#1}}}
+\newcommand{\xe}[1]{\mathrel{\underset{\ot}{#1}}}
+\newcommand{\xx}[1]{\mathrel{\underset{\tot}{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Formal Logic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\yields}{\mathrel{\vdash}}
+\newcommand{\nyields}{\mathrel{\vdash}}
+\renewcommand{\models}{\mathrel{\vDash}}
+\newcommand{\nmodels}{\mathrel{\nvDash}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Everyday Set Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\eqv}{\equiv}
+\newcommand{\iso}{\simeq}
+
+\newcommand{\power}{\mathcal P}
+
+\newcommand{\emp}{\varnothing}
+\newcommand{\nin}{\notin}
+\newcommand{\sub}{\subseteq}
+\newcommand{\nsub}{\nsubseteq}
+\newcommand{\subx}{\subset}
+\newcommand{\nsubx}{\nsubset}
+\newcommand{\super}{\supseteq}
+\newcommand{\nsuper}{\nsupseteq}
+\newcommand{\superx}{\supset}
+\newcommand{\nsuperx}{\nsupset}
+
+\newcommand{\sand}{\cap}
+\newcommand{\Sand}{\bigcap}
+\newcommand{\sor}{\cup}
+\newcommand{\Sor}{\bigcup}
+\newcommand{\sorp}{\uplus}
+\newcommand{\Sorp}{\biguplus}
+\newcommand{\diff}{\smallsetminus}
+\newcommand{\sdiff}{\mathbin{\triangle}}
+\newcommand{\co}{^{\mathsf{c}}}
+
+\newcommand{\X}{\times}
+\newcommand{\oX}{\otimes}
+\newcommand{\OX}{\bigotimes}
+\newcommand{\opl}{\oplus}
+\newcommand{\Opl}{\bigoplus}
+
+\newcommand{\inverse}{^{-1}}
+\newcommand{\inv}{\inverse}
+
+\renewcommand{\o}{\mathbin{\circ}} % \o used to be a special character
+\newcommand{\oc}{\mathbin{\zcmp}}
+\newcommand{\cd}{\mathbin{\cdot}}
+\newcommand{\dc}{\mathbin{;}}
+
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\inc}{\mathrm{inc}}
+\newcommand{\inj}{\mathrm{inj}}
+\newcommand{\prj}{\mathrm{prj}}
+\newcommand{\srj}{\mathrm{srj}}
+
+\newcommand{\pointwise}{\ \mathrm{pointwise}}
+\newcommand{\elementwise}{\ \mathrm{elementwise}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Everyday Order Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\ltgt}{\lessgtr}
+\newcommand{\gtlt}{\gtrless}
+\newcommand{\lteqgt}{\lesseqqgtr}
+\newcommand{\gteqlt}{\gtreqqless}
+
+\newcommand{\mand}{\wedge}
+\newcommand{\Mand}{\bigwedge}
+\newcommand{\mor}{\vee}
+\newcommand{\Mor}{\bigvee}
+
+\newcommand{\qle}{\sqsubseteq}
+\newcommand{\nqle}{\nsqsubseteq}
+\newcommand{\qge}{\sqsupseteq}
+\newcommand{\nqge}{\nsqsupseteq}
+\newcommand{\qlt}{\sqsubset}
+\newcommand{\nqlt}{\nsqsubset}
+\newcommand{\qgt}{\sqsupset}
+\newcommand{\nqgt}{\nsqsupset}
+\newcommand{\qand}{\sqcap}
+\newcommand{\Qand}{\bigsqcap}
+\newcommand{\qor}{\sqcup}
+\newcommand{\Qor}{\bigsqcup}
+
+\DeclareMathOperator{\argmax}{argmax}
+\DeclareMathOperator{\argmin}{argmin}
+
+\newcommand{\join}{\mathbin\vee}
+\newcommand{\meet}{\mathbin\wedge}
+\renewcommand{\Join}{\bigvee}
+\DeclareMathOperator{\Joindirected}{\bigvee_{\mathllap{\uparrow}}}
+\newcommand{\Meet}{\bigwedge}
+\DeclareMathOperator{\Meetddirected}{\bigwedge{\mathllap{\downarrow}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Category Theory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\op}{^\mathrm{op}}
+
+\newcommand{\Set}{\mathbf{Set}}
+\newcommand{\Cat}{\mathbf{Cat}}
+\renewcommand{\Top}{\mathbf{Top}}
+
+\DeclareMathOperator{\src}{src}
+\DeclareMathOperator{\tgt}{tgt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\es}{\bm{e}}
+\renewcommand{\i}{\mathrm{i}} % \i used to be a special character
+\newcommand{\PI}{\uppi}
+\newcommand{\ify}{\infty}
+
+\let\Re\relax
+\DeclareMathOperator{\Re}{Re}
+\let\Im\relax
+\DeclareMathOperator{\Im}{Im}
+
+\newcommand{\rt}[2][]{\sqrt[#1]{#2}}
+\newcommand{\conjugate}[1]{\overline{#1}}
+
+\DeclareMathOperator{\Log}{Log}
+\DeclareMathOperator{\Arg}{Arg}
+\DeclareMathOperator{\Ind}{Ind}
+\DeclareMathOperator{\Res}{Res}
+\DeclareMathOperator{\sgn}{sgn}
+
+\DeclareMathOperator{\uniflim}{unif\ lim}
+\newcommand{\unifto}[1][1]{\overset{\rm{unif}}{\to[#1]}}
+
+\newcommand{\del}{\partial}
+\newcommand{\nablas}{\bm \nabla}
+\renewcommand{\d}{\mathrm d} % \d used to be a diacritic
+\newcommand{\D}{\mathrm D}
+\newcommand{\DRe}{\D_{\mathrm{Re}}}
+\newcommand{\DIm}{\D_{\mathrm{Im}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algebra
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\Ker}{Ker}
+
+\newcommand{\transpose}{^\top}
+\newcommand{\trs}{\transpose}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Topology
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\diam}{diam}
+
+\newcommand{\closure}[1]{\overline{#1}}
+\newcommand{\interior}{^\circ}
+\newcommand{\exterior}{^\times}
+\newcommand{\boundary}{\partial}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probability and Statistics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Var}{Var}
+
+\newcommand{\distto}[1][1]{\overset{d}{\to[#1]}}
+\newcommand{\probto}[1][1]{\overset{p}{\to[#1]}}
+\newcommand{\asto}[1][1]{\overset{\mathrm{a.s.}}{\to[#1]}}

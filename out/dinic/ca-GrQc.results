@@ -1,0 +1,436 @@
+Loading graph ...Loaded graph: 5242 vertices, 28980 edges
+Computing ...
+solve: #vertices 5242
+ divided into size 1742 and size 3500
+  solve: #vertices 3500
+   divided into size 1801 and size 1699
+    solve: #vertices 1699
+     divided into size 1190 and size 509
+      solve: #vertices 509
+       divided into size 154 and size 355
+        solve: #vertices 355
+        solve: #vertices 154
+         divided into size 52 and size 102
+          solve: #vertices 102
+          solve: #vertices 52
+           divided into size 32 and size 20
+            solve: #vertices 20
+            solve: #vertices 32
+             divided into size 20 and size 12
+              solve: #vertices 12
+              solve: #vertices 20
+      solve: #vertices 1190
+       divided into size 119 and size 1071
+        solve: #vertices 1071
+        solve: #vertices 119
+         divided into size 75 and size 44
+          solve: #vertices 44
+           divided into size 24 and size 20
+            solve: #vertices 20
+            solve: #vertices 24
+          solve: #vertices 75
+           divided into size 15 and size 60
+            solve: #vertices 60
+            solve: #vertices 15
+    solve: #vertices 1801
+     divided into size 535 and size 1266
+      solve: #vertices 1266
+       divided into size 728 and size 538
+        solve: #vertices 538
+         divided into size 182 and size 356
+          solve: #vertices 356
+          solve: #vertices 182
+           divided into size 90 and size 92
+            solve: #vertices 92
+             divided into size 54 and size 38
+              solve: #vertices 38
+               divided into size 8 and size 30
+                solve: #vertices 30
+                solve: #vertices 8
+              solve: #vertices 54
+            solve: #vertices 90
+             divided into size 25 and size 65
+              solve: #vertices 65
+               divided into size 58 and size 7
+                solve: #vertices 7
+                solve: #vertices 58
+              solve: #vertices 25
+        solve: #vertices 728
+         divided into size 693 and size 35
+          solve: #vertices 35
+           divided into size 17 and size 18
+            solve: #vertices 18
+            solve: #vertices 17
+             divided into size 9 and size 8
+              solve: #vertices 8
+              solve: #vertices 9
+          solve: #vertices 693
+      solve: #vertices 535
+       divided into size 361 and size 174
+        solve: #vertices 174
+         divided into size 90 and size 84
+          solve: #vertices 84
+           divided into size 42 and size 42
+            solve: #vertices 42
+             divided into size 24 and size 18
+              solve: #vertices 18
+               divided into size 8 and size 10
+                solve: #vertices 10
+                solve: #vertices 8
+              solve: #vertices 24
+            solve: #vertices 42
+             divided into size 32 and size 10
+              solve: #vertices 10
+              solve: #vertices 32
+          solve: #vertices 90
+           divided into size 30 and size 60
+            solve: #vertices 60
+             divided into size 30 and size 30
+              solve: #vertices 30
+               divided into size 19 and size 11
+                solve: #vertices 11
+                solve: #vertices 19
+                 divided into size 5 and size 14
+                  solve: #vertices 14
+                  solve: #vertices 5
+              solve: #vertices 30
+            solve: #vertices 30
+             divided into size 7 and size 23
+              solve: #vertices 23
+               divided into size 5 and size 18
+                solve: #vertices 18
+                solve: #vertices 5
+              solve: #vertices 7
+        solve: #vertices 361
+         divided into size 119 and size 242
+          solve: #vertices 242
+          solve: #vertices 119
+           divided into size 24 and size 95
+            solve: #vertices 95
+             divided into size 78 and size 17
+              solve: #vertices 17
+               divided into size 10 and size 7
+                solve: #vertices 7
+                solve: #vertices 10
+              solve: #vertices 78
+            solve: #vertices 24
+  solve: #vertices 1742
+   divided into size 380 and size 1362
+    solve: #vertices 1362
+     divided into size 588 and size 774
+      solve: #vertices 774
+       divided into size 292 and size 482
+        solve: #vertices 482
+         divided into size 406 and size 76
+          solve: #vertices 76
+           divided into size 44 and size 32
+            solve: #vertices 32
+             divided into size 12 and size 20
+              solve: #vertices 20
+              solve: #vertices 12
+            solve: #vertices 44
+             divided into size 14 and size 30
+              solve: #vertices 30
+               divided into size 21 and size 9
+                solve: #vertices 9
+                solve: #vertices 21
+              solve: #vertices 14
+          solve: #vertices 406
+        solve: #vertices 292
+         divided into size 141 and size 151
+          solve: #vertices 151
+           divided into size 74 and size 77
+            solve: #vertices 77
+             divided into size 49 and size 28
+              solve: #vertices 28
+               divided into size 6 and size 22
+                solve: #vertices 22
+                 divided into size 14 and size 8
+                  solve: #vertices 8
+                  solve: #vertices 14
+                solve: #vertices 6
+              solve: #vertices 49
+               divided into size 34 and size 15
+                solve: #vertices 15
+                solve: #vertices 34
+                 divided into size 21 and size 13
+                  solve: #vertices 13
+                  solve: #vertices 21
+            solve: #vertices 74
+             divided into size 36 and size 38
+              solve: #vertices 38
+               divided into size 14 and size 24
+                solve: #vertices 24
+                solve: #vertices 14
+              solve: #vertices 36
+          solve: #vertices 141
+           divided into size 93 and size 48
+            solve: #vertices 48
+             divided into size 27 and size 21
+              solve: #vertices 21
+               divided into size 10 and size 11
+                solve: #vertices 11
+                solve: #vertices 10
+              solve: #vertices 27
+               divided into size 11 and size 16
+                solve: #vertices 16
+                 divided into size 9 and size 7
+                  solve: #vertices 7
+                  solve: #vertices 9
+                solve: #vertices 11
+            solve: #vertices 93
+      solve: #vertices 588
+       divided into size 236 and size 352
+        solve: #vertices 352
+         divided into size 183 and size 169
+          solve: #vertices 169
+           divided into size 91 and size 78
+            solve: #vertices 78
+             divided into size 26 and size 52
+              solve: #vertices 52
+               divided into size 35 and size 17
+                solve: #vertices 17
+                solve: #vertices 35
+                 divided into size 12 and size 23
+                  solve: #vertices 23
+                   divided into size 7 and size 16
+                    solve: #vertices 16
+                    solve: #vertices 7
+                  solve: #vertices 12
+              solve: #vertices 26
+               divided into size 21 and size 5
+                solve: #vertices 5
+                solve: #vertices 21
+            solve: #vertices 91
+             divided into size 68 and size 23
+              solve: #vertices 23
+               divided into size 10 and size 13
+                solve: #vertices 13
+                solve: #vertices 10
+              solve: #vertices 68
+               divided into size 5 and size 63
+                solve: #vertices 63
+                 divided into size 59 and size 4
+                  solve: #vertices 4
+                  solve: #vertices 59
+                solve: #vertices 5
+          solve: #vertices 183
+           divided into size 117 and size 66
+            solve: #vertices 66
+             divided into size 57 and size 9
+              solve: #vertices 9
+              solve: #vertices 57
+               divided into size 25 and size 32
+                solve: #vertices 32
+                solve: #vertices 25
+            solve: #vertices 117
+        solve: #vertices 236
+         divided into size 72 and size 164
+          solve: #vertices 164
+           divided into size 121 and size 43
+            solve: #vertices 43
+            solve: #vertices 121
+             divided into size 14 and size 107
+              solve: #vertices 107
+              solve: #vertices 14
+               divided into size 6 and size 8
+                solve: #vertices 8
+                solve: #vertices 6
+          solve: #vertices 72
+           divided into size 35 and size 37
+            solve: #vertices 37
+             divided into size 30 and size 7
+              solve: #vertices 7
+               divided into size 4 and size 3
+                solve: #vertices 3
+                solve: #vertices 4
+              solve: #vertices 30
+               divided into size 3 and size 27
+                solve: #vertices 27
+                 divided into size 15 and size 12
+                  solve: #vertices 12
+                  solve: #vertices 15
+                solve: #vertices 3
+            solve: #vertices 35
+             divided into size 10 and size 25
+              solve: #vertices 25
+               divided into size 19 and size 6
+                solve: #vertices 6
+                solve: #vertices 19
+              solve: #vertices 10
+    solve: #vertices 380
+     divided into size 124 and size 256
+      solve: #vertices 256
+       divided into size 109 and size 147
+        solve: #vertices 147
+         divided into size 83 and size 64
+          solve: #vertices 64
+           divided into size 40 and size 24
+            solve: #vertices 24
+             divided into size 12 and size 12
+              solve: #vertices 12
+               divided into size 10 and size 2
+                solve: #vertices 2
+                solve: #vertices 10
+              solve: #vertices 12
+               divided into size 3 and size 9
+                solve: #vertices 9
+                solve: #vertices 3
+            solve: #vertices 40
+             divided into size 19 and size 21
+              solve: #vertices 21
+               divided into size 6 and size 15
+                solve: #vertices 15
+                solve: #vertices 6
+              solve: #vertices 19
+          solve: #vertices 83
+           divided into size 48 and size 35
+            solve: #vertices 35
+             divided into size 15 and size 20
+              solve: #vertices 20
+              solve: #vertices 15
+            solve: #vertices 48
+             divided into size 16 and size 32
+              solve: #vertices 32
+               divided into size 14 and size 18
+                solve: #vertices 18
+                solve: #vertices 14
+              solve: #vertices 16
+        solve: #vertices 109
+         divided into size 53 and size 56
+          solve: #vertices 56
+           divided into size 21 and size 35
+            solve: #vertices 35
+             divided into size 17 and size 18
+              solve: #vertices 18
+              solve: #vertices 17
+            solve: #vertices 21
+          solve: #vertices 53
+           divided into size 25 and size 28
+            solve: #vertices 28
+             divided into size 24 and size 4
+              solve: #vertices 4
+              solve: #vertices 24
+            solve: #vertices 25
+             divided into size 1 and size 24
+              solve: #vertices 24
+              solve: #vertices 1
+      solve: #vertices 124
+       divided into size 46 and size 78
+        solve: #vertices 78
+         divided into size 43 and size 35
+          solve: #vertices 35
+          solve: #vertices 43
+        solve: #vertices 46
+Computation finished!
+#layers: 108
+layer   1: outer mass 2060 outer size   46 outer density 44.7826
+layer   2: outer mass 1612 outer size   43 outer density 37.4884
+layer   3: outer mass 1190 outer size   35 outer density 34
+layer   4: outer mass   24 outer size    1 outer density 24
+layer   5: outer mass  552 outer size   24 outer density 23
+layer   6: outer mass  536 outer size   24 outer density 22.3333
+layer   7: outer mass   86 outer size    4 outer density 21.5
+layer   8: outer mass  424 outer size   21 outer density 20.1905
+layer   9: outer mass  306 outer size   17 outer density 18
+layer  10: outer mass  318 outer size   18 outer density 17.6667
+layer  11: outer mass  256 outer size   16 outer density 16
+layer  12: outer mass  214 outer size   14 outer density 15.2857
+layer  13: outer mass  270 outer size   18 outer density 15
+layer  14: outer mass  214 outer size   15 outer density 14.2667
+layer  15: outer mass  282 outer size   20 outer density 14.1
+layer  16: outer mass  266 outer size   19 outer density 14
+layer  17: outer mass   80 outer size    6 outer density 13.3333
+layer  18: outer mass  196 outer size   15 outer density 13.0667
+layer  19: outer mass   38 outer size    3 outer density 12.6667
+layer  20: outer mass  112 outer size    9 outer density 12.4444
+layer  21: outer mass  120 outer size   10 outer density 12
+layer  22: outer mass   22 outer size    2 outer density 11
+layer  23: outer mass  106 outer size   10 outer density 10.6
+layer  24: outer mass  190 outer size   19 outer density 10
+layer  25: outer mass   58 outer size    6 outer density 9.66667
+layer  26: outer mass   28 outer size    3 outer density 9.33333
+layer  27: outer mass  138 outer size   15 outer density 9.2
+layer  28: outer mass  110 outer size   12 outer density 9.16667
+layer  29: outer mass   36 outer size    4 outer density 9
+layer  30: outer mass   26 outer size    3 outer density 8.66667
+layer  31: outer mass   50 outer size    6 outer density 8.33333
+layer  32: outer mass   66 outer size    8 outer density 8.25
+layer  33: outer mass  876 outer size  107 outer density 8.18692
+layer  34: outer mass  346 outer size   43 outer density 8.04651
+layer  35: outer mass  936 outer size  117 outer density 8
+layer  36: outer mass  194 outer size   25 outer density 7.76
+layer  37: outer mass  248 outer size   32 outer density 7.75
+layer  38: outer mass   69 outer size    9 outer density 7.66667
+layer  39: outer mass   38 outer size    5 outer density 7.6
+layer  40: outer mass  444 outer size   59 outer density 7.52542
+layer  41: outer mass   30 outer size    4 outer density 7.5
+layer  42: outer mass   74 outer size   10 outer density 7.4
+layer  43: outer mass   96 outer size   13 outer density 7.38462
+layer  44: outer mass  154 outer size   21 outer density 7.33333
+layer  45: outer mass   36 outer size    5 outer density 7.2
+layer  46: outer mass   86 outer size   12 outer density 7.16667
+layer  47: outer mass   50 outer size    7 outer density 7.14286
+layer  48: outer mass  114 outer size   16 outer density 7.125
+layer  49: outer mass  120 outer size   17 outer density 7.05882
+layer  50: outer mass  651 outer size   93 outer density 7
+layer  51: outer mass   76 outer size   11 outer density 6.90909
+layer  52: outer mass   62 outer size    9 outer density 6.88889
+layer  53: outer mass   48 outer size    7 outer density 6.85714
+layer  54: outer mass   68 outer size   10 outer density 6.8
+layer  55: outer mass   74 outer size   11 outer density 6.72727
+layer  56: outer mass  240 outer size   36 outer density 6.66667
+layer  57: outer mass   92 outer size   14 outer density 6.57143
+layer  58: outer mass  156 outer size   24 outer density 6.5
+layer  59: outer mass  136 outer size   21 outer density 6.47619
+layer  60: outer mass   84 outer size   13 outer density 6.46154
+layer  61: outer mass   96 outer size   15 outer density 6.4
+layer  62: outer mass   38 outer size    6 outer density 6.33333
+layer  63: outer mass   88 outer size   14 outer density 6.28571
+layer  64: outer mass   50 outer size    8 outer density 6.25
+layer  65: outer mass 2436 outer size  406 outer density 6
+layer  66: outer mass   82 outer size   14 outer density 5.85714
+layer  67: outer mass  122 outer size   21 outer density 5.80952
+layer  68: outer mass   52 outer size    9 outer density 5.77778
+layer  69: outer mass   68 outer size   12 outer density 5.66667
+layer  70: outer mass  112 outer size   20 outer density 5.6
+layer  71: outer mass  132 outer size   24 outer density 5.5
+layer  72: outer mass  416 outer size   78 outer density 5.33333
+layer  73: outer mass   52 outer size   10 outer density 5.2
+layer  74: outer mass   36 outer size    7 outer density 5.14286
+layer  75: outer mass 1210 outer size  242 outer density 5
+layer  76: outer mass   34 outer size    7 outer density 4.85714
+layer  77: outer mass   24 outer size    5 outer density 4.8
+layer  78: outer mass   86 outer size   18 outer density 4.77778
+layer  79: outer mass  140 outer size   30 outer density 4.66667
+layer  80: outer mass   23 outer size    5 outer density 4.6
+layer  81: outer mass   64 outer size   14 outer density 4.57143
+layer  82: outer mass   50 outer size   11 outer density 4.54545
+layer  83: outer mass  144 outer size   32 outer density 4.5
+layer  84: outer mass   44 outer size   10 outer density 4.4
+layer  85: outer mass  104 outer size   24 outer density 4.33333
+layer  86: outer mass   34 outer size    8 outer density 4.25
+layer  87: outer mass   42 outer size   10 outer density 4.2
+layer  88: outer mass 2772 outer size  693 outer density 4
+layer  89: outer mass   34 outer size    9 outer density 3.77778
+layer  90: outer mass   30 outer size    8 outer density 3.75
+layer  91: outer mass   66 outer size   18 outer density 3.66667
+layer  92: outer mass   90 outer size   25 outer density 3.6
+layer  93: outer mass  203 outer size   58 outer density 3.5
+layer  94: outer mass   24 outer size    7 outer density 3.42857
+layer  95: outer mass  180 outer size   54 outer density 3.33333
+layer  96: outer mass   26 outer size    8 outer density 3.25
+layer  97: outer mass   96 outer size   30 outer density 3.2
+layer  98: outer mass 1068 outer size  356 outer density 3
+layer  99: outer mass   42 outer size   15 outer density 2.8
+layer 100: outer mass  160 outer size   60 outer density 2.66667
+layer 101: outer mass   60 outer size   24 outer density 2.5
+layer 102: outer mass   48 outer size   20 outer density 2.4
+layer 103: outer mass 2142 outer size 1071 outer density 2
+layer 104: outer mass   35 outer size   20 outer density 1.75
+layer 105: outer mass   20 outer size   12 outer density 1.66667
+layer 106: outer mass   30 outer size   20 outer density 1.5
+layer 107: outer mass  136 outer size  102 outer density 1.33333
+layer 108: outer mass  355 outer size  355 outer density 1
+Max call depth: 10
+Elapsed time: 0.149 s

@@ -1,0 +1,1151 @@
+﻿\documentclass[dvipdfmx, uplatex, 14pt]{jsarticle}
+
+\usepackage{mymath}
+
+\title{局所密分解の一般化}
+\author{松下 祐介 \\\protect \small
+東京大学理学部情報科学科 \\\protect \small
+\href{mailto:yskm24t@is.s.u-tokyo.ac.jp}
+{\nolinkurl{yskm24t@is.s.u-tokyo.ac.jp}}}
+
+\declaretheorem[name = 定義, refname = 定義,
+  style = definition]{definition}
+\declaretheorem[name = 命題, refname = 命題,
+  style = definition, sibling = definition]{proposition}
+\declaretheorem[name = 補題, refname = 補題,
+  style = definition, sibling = definition]{lemma}
+\declaretheorem[name = 系, refname = 系,
+  style = definition, sibling = definition]{corollary}
+\declaretheorem[name = 補足, refname = 補足,
+  style = definition, sibling = definition]{note}
+\renewcommand*{\proofname}{\textbf{証明}}
+
+\floatname{algorithm}{アルゴリズム}
+\renewcommand{\algorithmicrequire}{\textbf{制約}:}
+\renewcommand{\algorithmicensure}{\textbf{保証}:}
+
+\crefname{table}{表}{表}
+
+\begin{document}
+
+\maketitle
+
+\section{概要}
+
+まず、\citet{tatti-gionis} の研究について紹介しよう。
+\citet{tatti-gionis} では、
+無向グラフの密度関数を \(\text{(辺数)} / \text{(頂点数)}\) として、
+無向グラフの点誘導部分グラフで
+\textbf{局所密} (locally dense) という性質を満たすものを列挙する
+\textbf{局所密分解} (locally-dense decomposition) が考案され、
+厳密アルゴリズムと線形時間近似アルゴリズムが与えられている。
+局所密集合の族は包含関係について全順序部分集合をなし、
+\textbf{コア分解} (core decomposition) と類似の特長をもつが、
+内側の局所密集合ほど密度が濃いという性質が必ず成立する
+（\citet{tatti-gionis} の図 1 からわかるように、
+コア分解は必ずしもこの性質を満たさない）
+という点でコア分解より性質が良い。
+また多くの場合、
+局所密分解ではコア分解に比べてかなり細かく分かれた階層が得られる
+（\citet{tatti-gionis} の表 3）。
+
+さて、ここではさらに一般化して、
+頂点集合の冪集合の代わりに任意の有限束上で考えることにして、
+分子の「\textbf{質量関数}」を辺数の代わりに任意の単調優モジュラ関数、
+分母の「\textbf{サイズ関数}」を頂点数の代わりに任意の単調劣モジュラ関数
+（ただし、いずれの関数も最小値は 0 であり、
+質量関数は最大元でのみ最大値を取り、
+サイズ関数は最小元でのみ最小値を取る）としても
+諸性質が成立することを示す。
+また、独自に興味深い性質の発見、
+証明の改善、アルゴリズムの改善などをおこなった。
+
+そして、定義域が有限集合の冪集合である場合について一般に
+局所密分解のための多項式時間アルゴリズムが得られることについて触れ、
+さらに辺の密度に限らず多重集合上の任意点数の\textbf{パターン}の密度にも
+局所密分解の枠組みが使えることを示した。
+辺の密度については \citet{tatti-gionis} での議論を
+詳しく説明し直した。
+
+実装としては、辺の密度に関する局所密分解を書いた。
+最大フロー最小カットには Dinic のアルゴリズムを用いた。
+
+\section{基本概念}
+
+\renewcommand{\L}{\mathcal L} % \L used to be a special character
+2元以上持つ（最小元と最大元が異なる）有限束 \(\L\) を自由に選ぶ。
+最小元を \(\bot\)、最大元を \(\top\) と書くことにする。
+束の演算は \(\qle, \qlt, \qand, \qor\) で表すことにする。
+この有限束の元は\textbf{コンテナ}と呼ぶことにしよう。
+\textbf{質量関数} \(m \colon \L \to \RR_{\ge 0}\) と
+\textbf{サイズ関数} \(s \colon \L \to \RR_{\ge 0}\) で、
+以下を満たすものを任意に取って考えることにする。
+\footnote{
+  質量関数、サイズ関数という名称は自分で考えた。
+  物理における密度のアナロジーである。
+}
+\begin{itemize}
+  \item
+    \(m,\,s\) は単調、すなわち \(X \qle Y\) なら
+    \(m\p{X} \le m\p{Y}\) かつ \(s\p{X} \le s\p{Y}\)。
+  \item
+    \(m\) は\textbf{優モジュラ} (supermodular)、すなわち
+    \(m\p{X} + m\p{Y} \le m\p{X \qand Y} + m\p{X \qor Y}\)。
+  \item
+    \(s\) は\textbf{劣モジュラ} (submodular)、すなわち
+    \(s\p{X} + s\p{Y} \ge s\p{X \qand Y} + s\p{X \qor Y}\)。
+  \item
+    \(m\p{\bot} = s\p{\bot} = 0\)。
+    \footnote{
+      これは外密度 \(d_\bot\p{X}\) が
+      密度 \(d\p{X}\) と一致することを
+      要請するための制約にすぎない。
+    }
+  \item
+    \(X \qlt \top\) ならば
+    \(m\p{X} < m\p{\top}\) であり、
+    \(Y \qgt \bot\) ならば
+    \(s\p{Y} > s\p{\bot} = 0\) である。
+    \footnote{
+      この条件が仮に満たされていなくても、
+      \(m\) は優モジュラであるので、
+      \(m\p{X}\) を最大化する \(X\) 全体は
+      \(\L\) の部分束をなし、
+      特にそのような \(X\) の中で束で最小のもの \(\top_*\) が取れ、
+      同様に \(s\p{Y}\) を最小化する
+      （すなわち \(s\p{Y} = 0\) となる）\(Y\) の中で
+      束で最大のもの \(\bot^*\) が取れる。
+
+      \(\L\) が有限集合 \(V\) の冪集合 \(2^V\)
+      である場合を考えると、
+      質量の優モジュラ性より
+      \(x \nin \top_*\) であることと
+      \(x\) が質量の増加に全く寄与しない
+      （すなわち、いかなる集合 \(X \in 2^V\) についても
+      \(m\p{X \cup \c{x}} = m\p{X}\) である）
+      ことは同値であるし、
+      サイズの劣モジュラ性より
+      \(x \in \bot^*\) であることと
+      \(x\) がサイズの増加に全く寄与しない
+      ことも同値である。
+
+      ゆえに、\(\bot^* \qle X \qle \top_*\) の範囲で
+      考えるようにすることは特に実用上の問題にならないと思う。
+    }
+\end{itemize}
+
+特に、\citet{tatti-gionis} では
+有限無向グラフ \(G = \p{V, E}\) を考え、
+\(\L\) を \(V\) の冪集合の束として
+\(m\p{X} \defeq \t{E\p{X}},\ s\p{X} \defeq \t{X}\)
+と定義した場合が論じられている。
+
+\begin{definition}
+  \(s\p{A} > 0\) であるとき、\(A\) の\textbf{密度}を
+  \(d\p{A} \defeq m\p{A} / s\p{A}\) として定義する。
+
+  \(A \qle B\) であるとき、
+  \(B\) の \(A\) に対する\textbf{外質量}、\textbf{外サイズ}をそれぞれ
+  \(m_A\p{B} \defeq m\p{B} - m\p{A},\
+    s_A\p{B} \defeq s\p{B} - s\p{A}\) として定義し、
+  \(B\) の \(A\) に対する\textbf{外密度} (outer density) を
+  それらの比 \(d_A\p{B} \defeq m_A\p{B} / s_A\p{B}\) として定義する。
+  特に、\(d_\bot\p{B} = d\p{B}\) が成立することに注意。
+
+  ただし、密度および外密度の計算において、
+  \(\text{(正の数)} / 0 = \infty,\ 0 / 0 = 0\) とする。
+  \(\RR \cup \p{\infty}\) は上に有界な全順序集合をなすと考える
+  （\(\infty < \infty\) は成立しないとする）。
+\end{definition}
+
+次の補題は以下の議論で多用される。
+\footnote{
+  \citet{tatti-gionis} ではこれら2つの補題ははっきり述べられていない。
+  ここでの\cref{density-supermodular}は、
+  \citet{tatti-gionis} の命題 3 の証明の中で暗に使われている。
+  ここでの\cref{density-blend}は、
+  \citet{tatti-gionis} の補題 6 と補題 7 で部分的に述べられている。
+}
+
+\begin{lemma}\label{density-supermodular}
+  \(d_{A \qand B}\p{B} \ge d_A\p{A \qor B}\) が成立する。
+\end{lemma}
+\begin{proof}
+  \(m\) の優モジュラ性、\(s\) の劣モジュラ性より明らか。
+\end{proof}
+
+\begin{lemma}\label{density-blend}
+  \(A \qlt B \qlt C\) であり
+  \(\p{m_A\p{B}, s_A\p{B}},\,
+    \p{m_A\p{C}, s_A\p{C}},\,
+    \p{m_B\p{C}, s_B\p{C}} \ne \p{0, 0}\) であるとき、
+  以下は同値。
+  (i) \(d_A\p{B} \gteqlt d_B\p{C}\)。
+  (ii) \(d_A\p{B} \gteqlt d_A\p{C}\)。
+  (iii) \(d_A\p{C} \gteqlt d_B\p{C}\)。
+  ただし、複号は同順。
+\end{lemma}
+\begin{proof}
+  分数の中間値の性質より明らかである。
+\end{proof}
+
+\section{局所密分解}
+
+まず、いくつか道具を導入する。
+
+\begin{definition}
+  パラメータ \(\alpha \in \RR_{\ge 0}\) を取る
+  関数 \(\delta_\alpha\p{X}
+    \defeq m\p{X} - \alpha s\p{X}\) を考えよう。
+  \(\delta_\alpha\p{X}\) は優モジュラであるから、
+  \(\delta_\alpha\p{X}\) を最大化する \(X\) 全体は
+  \(\L\) の部分束をなす。
+  そのような \(X\) のうち
+  束で最小のものを \(\Delta_*\p{\alpha}\)、
+  束で最大のものを \(\Delta^*\p{\alpha}\) と書くことにする。
+
+  \citet{tatti-gionis} では
+  \(\Delta^*\p{\alpha}\) の側のみを
+  （\(F\) という表記で）導入しているが、
+  以下では \(\Delta_*\p{\alpha}\) の側を主に扱う。
+\end{definition}
+
+\(\Delta_*\p{\alpha},\,\Delta^*\p{\alpha}\) は
+サイズに関して \(\alpha\) 倍のペナルティーを与えた上で
+質量をどれだけ大きくできるかということだから、
+実用的な観点からも非常に自然な問いに答えるものだということがわかるだろう。
+
+以下の補題が重要である。
+\footnote{
+  \citet{tatti-gionis} ではこの補題は
+  \cref{Dalpha} の証明中で使われているが、
+  補題として明示的に設けることで、
+  局所密の定義がよりわかりやすくなるし、
+  \cref{locally-dense-increment}の証明にも使えるようになった。
+}
+
+\begin{lemma}\label{Dalpha-separation}
+  任意の \(\alpha \in \RR_{\ge 0}\) を取る。
+  \(X \qlt \Delta_*\p{\alpha} \qle Y\) であるならば
+  \(d_X\p{\Delta_*\p{\alpha}} > \alpha
+    \ge d_{\Delta_*\p{\alpha}}\p{Y}\) である。
+\end{lemma}
+\begin{proof}
+  \(\delta_\alpha\p{\Delta_*\p{\alpha}}
+    > \delta_\alpha\p{X},
+  \ \delta_\alpha\p{Y}
+    \le \delta_\alpha\p{\Delta_*\p{\alpha}}\) より
+  \(m_X\p{\Delta_*\p{\alpha}}
+      - \alpha s_X\p{\Delta_*\p{\alpha}} > 0,\
+    m_{\Delta_*\p{\alpha}}\p{Y}
+      - \alpha s_{\Delta_*\p{\alpha}}\p{Y} \le 0\)
+  であるから、
+  \(d_X\p{\Delta_*\p{\alpha}} > \alpha
+    \ge d_{\Delta_*\p{\alpha}}\p{Y}\) が得られる。
+  \footnote{
+    ここで \(\alpha \ge d_{\Delta_*\p{\alpha}}\p{Y}\)
+    を成立させるために、\(0 / 0 = 0\) と定義したのである。
+  }
+\end{proof}
+
+この補題より \(\Delta_*\p{\alpha}\) が満たす性質として、
+局所密という概念が考えられる。
+
+\begin{definition}
+  コンテナ \(A\) が\textbf{局所密} (locally dense) であるというのを、
+  \(X \qlt A \qle Y\) であるとき
+  \(d_X\p{A} > d_A\p{Y}\) が成立することとして定義する。
+\end{definition}
+
+以下の綺麗な性質が得られる。
+
+\begin{proposition}\label{locally-dense-inclusion}
+  \(A, B\) が局所密であるならば、
+  \(A \qle B\) と \(A \qge B\) のいずれかが成立する。
+  \footnote{
+    これは \citet{tatti-gionis} で
+    命題 3 として述べられている内容である。
+  }
+\end{proposition}
+\begin{proof}
+  対称性より
+  \(d_{A \qand B}\p{A} \le d_{A \qand B}\p{B}\) としてよい。
+  \cref{density-supermodular}より
+  \(d_{A \qand B}\p{B} \le d_A\p{A \qor B}\) が成立するから、
+  \(d_{A \qand B}\p{A} \le d_A\p{A \qor B}\) が得られる。
+  \(A\) は局所密であるから、
+  \(A \qand B = A\) すなわち \(A \qle B\) でなくてはならない。
+\end{proof}
+
+\begin{definition}
+  先ほどの命題を踏まえて、局所密なコンテナ全体を
+  \(D_0 \qlt D_1 \qlt \dots \qlt D_K\)
+  というように番号付けることにする。
+  このように局所密なコンテナの族を得ることを
+  \textbf{局所密分解} (locally-dense decomposition) と呼ぶことにする。
+
+  \(\bot\) は \(X \qlt \bot\) なる \(X\) が取れないから局所密となる。
+  ゆえに \(D_0 = \bot\) である。
+
+  \(d_X\p{\top} > 0 = d_{\top}\p{\top}\) が成立するから、
+  \(\top\) は局所密となる。
+  ゆえに \(D_K = \top\) である。
+\end{definition}
+
+\begin{note}\label{outer-density-chain}
+  局所密の定義より
+  \(\infty > d_{D_0}\p{D_1} > d_{D_1}\p{D_2}
+    > \dots > d_{D_{K-1}}\p{D_K} > 0\)
+  が成立するということに注意。
+  この性質を拡張して、\(d_{D_{-1}}\p{D_0} \defeq \infty,\
+  d_{D_K}\p{D_{K+1}} \defeq 0\) と定義することにしよう
+  （これ以外の形で \(D_{-1},\,D_{K+1}\) は登場しない）。
+\end{note}
+
+\begin{note}
+  局所密の定義より \(1 \le i \le K - 1\) について
+  \(d\p{D_i} = d_\bot\p{D_i} > d_{D_i}\p{D_{i+1}}\) であるから、
+  \cref{density-blend}より
+  \(d\p{D_1} > d\p{D_2} > \dots > d\p{D_K}\) が成立することがわかる。
+  これは、コア分解では見られない重要な性質である。
+\end{note}
+
+\cref{Dalpha-separation}より
+任意の \(\alpha \in \RR_{\ge 0}\) について
+\(\Delta_*\p{\alpha}\) は局所密であったが、
+実は任意の局所密なコンテナはこの形で書ける。
+
+\begin{proposition}\label{Dalpha}
+  任意の \(i = 0, \dots, K\) について、
+  \(d_{D_{i-1}}\p{D_i} > \alpha \ge d_{D_i}\p{D_{i+1}}\) であれば
+  \(D_i = \Delta_*\p{\alpha}\) が成立する。
+  \footnote{
+    これは \citet{tatti-gionis} の命題 9 の主張を
+    \(\Delta^*\) の代わりに \(\Delta_*\) に合うように
+    微修正したものである。
+  }
+\end{proposition}
+\begin{proof}
+  \(i+1 \le j \le K\) に対し、
+  \cref{outer-density-chain}より
+  \(\alpha \ge d_{D_{j-1}}\p{D_j}\) であるから、
+  \(m_{D_{j-1}}\p{D_j} - \alpha s_{D_{j-1}}\p{D_j} \le 0\)
+  が成立するので、
+  \(\delta_\alpha\p{D_{j-1}} \ge \delta_\alpha\p{D_j}\) が得られる。
+  \(1 \le j \le i\) に対し、
+  \cref{outer-density-chain}より
+  \(d_{D_{j-1}}\p{D_j} > \alpha\) であるから、
+  同様に \(\delta_\alpha\p{D_{j-1}}
+    < \delta_\alpha\p{D_j}\) が得られる。
+  ゆえに
+  \(\dots < \delta_\alpha\p{D_{i-1}} < \delta_\alpha\p{D_{i}}
+    \ge \delta_\alpha\p{D_{i+1}} \ge \dots\) であるから、
+  \(\Delta_*\p{\alpha} = D_i\) が得られる。
+\end{proof}
+
+\begin{note}
+  以上より、局所密であることと
+  \(\Delta_*\p{\alpha}\) の値域に属することは同値であるとわかった。
+
+  また、局所密分解
+  \(D_0 \qlt D_1 \qlt D_2 \qlt
+    \dots \qlt D_{K-1} \qlt D_K\) が得られれば
+  \(d_{D_0}\p{D_1}, d_{D_1}\p{D_2},
+    \dots, d_{D_{K-1}}\p{D_K}\) もわかるから、
+  \(\Delta_*\p{\alpha}\) の関数形が得られたことになる。
+\end{note}
+
+ここで、以下の概念を
+\cref{locally-dense-increment}のために補助的に導入する。
+
+\begin{definition}
+  コンテナ \(A\) は任意の \(X \qlt A\) について
+  \(\p{m_X\p{A}, s_X\p{A}} \ne \p{0, 0}\) を
+  満たしているとき、\textbf{凝縮}しているといわれる。
+
+  特に、局所密なコンテナは凝縮している。
+
+  なお、\(m,\,s\) のいずれかが狭義単調である場合は
+  すべてのコンテナが凝縮していることになる。
+\end{definition}
+
+さて、\cref{Dalpha}を使うと、
+隣り合う番号の局所密集合について興味深い性質が得られる。
+
+\begin{proposition}\label{locally-dense-increment}
+  \(i = 0, \dots, K-1\) に対し、
+  \(D_{i+1}\) は
+  \(d_{D_i}\p{Y}\) を最大化する凝縮した \(Y \qge D_i\) のうちで
+  束で最大のものである。
+  \footnote{
+    \(D_{i+1}\) は \(d_{D_i}\p{Y}\) を最大化するという主張は
+    \citet{tatti-gionis} で命題 5 として紹介されており、
+    これを最大化する凝縮したコンテナのうちで束で最大となるという性質は
+    自分で気づいた。
+    \citet{tatti-gionis} の証明はかなり複雑なものになっているが、
+    ここでは \(\Delta_*\) を使うことで簡潔に示している。
+  }
+\end{proposition}
+\begin{proof}
+  \(\alpha = d_{D_i}\p{D_{i+1}}\) とすると、
+  \cref{Dalpha} より\(D_i = \Delta_*\p{\alpha}\) であり、
+  さらに\cref{Dalpha-separation}より
+  任意の \(Y \qge \Delta_*\p{\alpha} = D_i\) について
+  \(d_{D_i}\p{D_{i+1}} = \alpha
+    \ge d_{\Delta_*\p{\alpha}}\p{Y} = d_{D_i}\p{Y}\)
+  であるから、
+  \(D_{i+1}\) は \(d_{D_i}\p{Y}\) を最大化する。
+
+  よって、\(d_{D_i}\p{Y}\) を最大化する
+  凝縮した \(C\) が任意に与えられたときに
+  \(C \qle D_{i+1}\) となることを示せばよい。
+
+  矛盾を導くために \(C \nqle D_{i+1}\) と仮定する。
+  \(C \qand D_{i+1} \qlt C\) となるから、\(C\) の凝縮性より
+  \(\p{m_{C \qand D_{i+1}}\p{C},\,s_{C \qand D_{i+1}}\p{C}}
+    \ne \p{0, 0}\) (*)
+  が得られる。
+  \(d_{D_i}\p{C \qand D_{i+1}} \le d_{D_i}\p{C}\) であるから、
+  \cref{density-blend}と (*) より
+  \(d_{C \qand D_{i+1}}\p{C} \ge d_{D_i}\p{C}\) が得られる。
+  ゆえに、\cref{density-supermodular}を使うと
+  \(d_{D_{i+1}}\p{C \qor D_{i+1}}
+    \ge d_{C \qand D_{i+1}}\p{C} \ge d_{D_i}\p{C}
+    = d_{D_i}\p{D_{i+1}}\) が得られるが、
+  これは \(D_{i+1}\) の局所密性に反する。
+\end{proof}
+
+\begin{corollary}
+  \(D_1\) は、密度最大の凝縮しているコンテナのうち、束で最大のものである。
+\end{corollary}
+
+同様に、以下も成立する。
+
+\begin{proposition}\label{locally-dense-decrement}
+  \(i = 1, \dots, K\) に対し、
+  \(D_{i-1}\) は
+  \(d_X\p{D_i}\) を最小化する \(X \qlt D_i\) のうちで
+  束で最小のものである。
+\end{proposition}
+\begin{proof}
+  \cref{Dalpha}より、任意の十分小さい \(\epsilon > 0\) に対して
+  \(\alpha = d_{D_{i-1}}\p{D_i} - \epsilon\) としたときに
+  \(D_i = \Delta_*\p{\alpha}\) であり、
+  さらに\cref{Dalpha-separation}より
+  任意の \(X \qlt D_i = \Delta_*\p{\alpha}\) について
+  \(d_{D_{i-1}}\p{D_i} - \epsilon = \alpha
+    < d_X\p{\Delta_*\p{\alpha}} = d_X\p{D_i}\)
+  であるから、\(\epsilon \to 0\) を考えると
+  \(d_{D_{i-1}}\p{D_i} \le d_X\p{D_i}\) が得られる。
+  ゆえに、\(D_{i+1}\) は \(d_X\p{D_i}\) を最小化する。
+
+  よって、\(d_{D_i}\p{Y}\) を最小化する \(C\) が任意に与えられたときに
+  \(D_{i-1} \qle C\) となることを示せばよい。
+
+  そうでないと仮定すると、\(D_{i-1} \qand C \qlt D_{i-1}\) であるから
+  \(D_{i-1}\) の局所密性より
+  \(d_{D_{i-1} \qand C}\p{D_{i-1}} > d_{D_{i-1}}\p{D_i}
+    = d_C\p{D_i}\) である。
+  \cref{density-supermodular}より
+  \(d_C\p{D_{i-1} \qor C} \ge d_{D_{i-1} \qand C}\p{D_{i-1}}\)
+  が得られるから
+  \(d_C\p{D_{i-1} \qor C} > d_C\p{D_i}\) であるので、
+  \cref{density-blend}より
+  \(d_{D_{i-1} \qor C}\p{D_i} > d_C\p{D_i}\) となり
+  \(C\) が \(d_{D_i}\p{Y}\) を最小化するという仮定に反する。
+\end{proof}
+
+また、次の性質はアルゴリズムの設計上重要である。
+
+\begin{proposition}\label{alpha-medium}
+  \(0 \le a < b \le K\) が与えられているとき、
+  \(\alpha \defeq d_{D_a}\p{D_b},\
+    D_c \defeq \Delta_*\p{\alpha}\) とすると、
+  \(a + 1 < b\) ならば \(a < c < b\) が、
+  \(a + 1 = b\) ならば \(c = a\) が成立する。
+  \footnote{
+    \citet{tatti-gionis} では
+    \(\alpha \defeq d_{D_a}\p{D_b} + \t{V}^{-2}\)
+    として \(\Delta^*\) を使う方針を取っているが、
+    こうすると流量を有理数として正確に計算する場合には
+    分母が大きくなりすぎるので、
+    \(\alpha \defeq d_{D_a}\p{D_b}\) とするのが良いと思う。
+  }
+\end{proposition}
+\begin{proof}
+  \cref{Dalpha}を用いる。
+  \(a + 1 < b\) の場合は
+  \cref{outer-density-chain}と\cref{density-blend}より
+  \(d_{D_a}\p{D_{a+1}} > d_{D_a}\p{D_b} > d_{D_{b-1}}\p{D_b}\)
+  が成立するから、\(a < c < b\) が満たされる。
+  \(a + 1 = b\) なら \(d_{D_a}\p{D_{a+1}} = d_{D_a}\p{D_b}\) より
+  \(c = a\) が得られる。
+\end{proof}
+
+さて、これで厳密アルゴリズムが得られるわけであるが、
+一旦少し脱線した話題について述べておこうと思う。
+
+\subsection{
+  \texorpdfstring{\(\Delta^*\p{\alpha}\)}{Δ\^{}*(α)}を使う場合}
+
+\(\Delta_*\p{\alpha}\) の代わりに
+\(\Delta^*\p{\alpha}\) を使う場合について考えよう。
+両者はかなり似た性質を示すことがわかり、
+特に \(m, s\) のいずれかが狭義単調である場合は
+有限個の \(\alpha\) を除いて
+\(\Delta_*\p{\alpha} = \Delta^*\p{\alpha}\) となる。
+
+\(\Delta_*\p{\alpha}\) の場合と同様にして得られる証明は
+適宜省いた。
+
+\newcommand{\bd}{{\hat{d}}}
+
+密度や外密度の定義において、
+\(0 / 0\) を \(0\) でなくて \(\infty\) と定義したものを、
+\(d\p{Y}\) や \(d_X\p{Y}\) の代わりに
+\(\bd\p{Y}\) や \(\bd_X\p{Y}\) と書くことにする。
+
+こうすると、後は同様に議論することができる。
+
+なお、局所密の代わりに\textbf{飽和局所密}と呼ぶことにした。
+のちほど凝縮に対応するものとして飽和という概念を導入するので、
+この名前を付けた。
+元の局所密はここでは\textbf{凝縮局所密}と呼ぶことにしよう。
+
+\begin{lemma}
+  任意の \(\alpha \in \RR_{\ge 0}\) を取る。
+  \(X \qle \Delta^*\p{\alpha} \qlt Y\) であるならば
+  \(\bd_X\p{\Delta^*\p{\alpha}} \ge \alpha
+    > \bd_{\Delta^*\p{\alpha}}\p{Y}\) である。
+\end{lemma}
+
+\begin{definition}
+  コンテナ \(A\) が\textbf{飽和局所密}であるというのを、
+  \(X \qle A \qlt Y\) であるとき
+  \(\bd_X\p{A} > \bd_A\p{Y}\) が成立することとして定義する。
+\end{definition}
+
+\begin{proposition}
+  \(A, B\) が飽和局所密であるならば、
+  \(A \qle B\) と \(A \qge B\) のいずれかが成立する。
+\end{proposition}
+
+\newcommand{\bD}{{\hat{D}}}
+\newcommand{\bK}{{\hat{K}}}
+
+\begin{definition}
+  先ほどの命題を踏まえて、飽和局所密なコンテナ全体を
+  \(\bD_0 \qlt \bD_1 \qlt \dots \qlt \bD_\bK\)
+  というように番号付けることにする。
+  このように飽和局所密なコンテナの族を得ることを
+  \textbf{飽和局所密分解}と呼ぶことにする。
+
+  \(\bD_0 = \bot\) と \(\bD_\bK = \top\) が成立する。
+\end{definition}
+
+\begin{note}
+  飽和局所密の定義より
+  \(\infty > \bd_{\bD_0}\p{\bD_1} > d_{\bD_1}\p{\bD_2}
+    > \dots > \bd_{\bD_{\bK-1}}\p{\bD_\bK} > 0\)
+  が成立するということに注意。
+  この性質を拡張して、\(\bd_{\bD_{-1}}\p{\bD_0} \defeq \infty,\
+  \bd_{\bD_\bK}\p{\bD_{\bK+1}} \defeq 0\) と定義することにしよう
+  （これ以外の形で \(\bD_{-1},\,\bD_{\bK+1}\) は登場しない）。
+\end{note}
+
+\begin{note}
+  \(\bd\p{\bD_1} > \bd\p{\bD_2} > \dots > \bd\p{\bD_\bK}\)
+  が成立する。
+\end{note}
+
+\begin{proposition}
+  任意の \(i = 0, \dots, \bK\) について、
+  \(\bd_{\bD_{i-1}}\p{\bD_i}
+    \ge \alpha > \bd_{\bD_i}\p{\bD_{i+1}}\) であれば
+  \(\bD_i = \Delta^*\p{\alpha}\) が成立する。
+  なお、\(\Delta^*\p{0} = \bD_\bK = \top\) である。
+\end{proposition}
+
+\begin{note}
+  以上より、飽和局所密であることと
+  \(\Delta^*\p{\alpha}\) の値域に属することは同値であるとわかった。
+
+  また、飽和局所密分解
+  \(\bD_0 \qlt \bD_1 \qlt \bD_2 \qlt
+    \dots \qlt \bD_{\bK-1} \qlt \bD_\bK\) が得られれば
+  \(\bd_{\bD_0}\p{\bD_1}, \bd_{\bD_1}\p{\bD_2},
+    \dots, \bd_{\bD_{\bK-1}}\p{\bD_\bK}\) もわかるから、
+  \(\Delta^*\p{\alpha}\) の関数形が得られたことになる。
+\end{note}
+
+実はここから、凝縮局所密分解と飽和局所密分解が綺麗に対応することがわかる。
+
+\begin{lemma}
+  異なる \(\alpha_1, \alpha_2 \in \RR_{\ge 0}\) について
+  \(\Delta_*\p{\alpha_1} = \Delta_*\p{\alpha_2}\) かつ
+  \(\Delta^*\p{\alpha_1} = \Delta^*\p{\alpha_2}\)
+  が成立するならば、
+  前者を \(D\)、後者を \(\bD\) として
+  \(m_D\p{\bD} = s_D\p{\bD} = 0\) である。
+\end{lemma}
+\begin{proof}
+  \(\Delta_*\p{\alpha}, \Delta^*\p{\alpha}\) の定義より、
+  \(\delta_\alpha\p{D} = \delta_\alpha\p{\bD}\) すなわち
+  \(m\p{D} - \alpha s\p{D} = m\p{\bD} - \alpha s\p{\bD}\) が
+  \(\alpha = \alpha_1, \alpha_2\) で成立する。
+  ゆえに、これは \(\alpha\) についての恒等式である。
+  つまり、\(m\p{D} = m\p{\bD}\)
+  かつ \(s\p{D} = s\p{\bD}\) が成立する。
+\end{proof}
+
+\begin{corollary}
+  \(\bK = K\) であり、
+  \(i = 0, \dots, K\) について
+  \(d_{D_i}\p{D_{i+1}} = \bd_{\bD_i}\p{\bD_{i+1}}\) および
+  \(m_{D_i}\p{\bD_i} = s_{D_i}\p{\bD_i} = 0\) が成立する。
+
+  特に、\(m, s\) のいずれかが狭義単調であるとき、
+  \(i = 0, \dots, K\) について \(D_i = \bD_i\) が成立し、
+  それゆえ \(\alpha\) が
+  \(d_{D_0}\p{D_1}, \dots, d_{D_{K-1}}\p{D_K}\) 以外のとき
+  \(\Delta_*\p{\alpha} = \Delta^*\p{\alpha}\) となる。
+  この状況においては、凝縮局所密であることと飽和局所密であることは
+  同値である。
+\end{corollary}
+
+さて、再び \(\Delta_*\p{\alpha}\) と同様の性質を見ていこう。
+先ほどの凝縮に対応するものを飽和と呼ぶことにした。
+
+\begin{definition}
+  コンテナ \(A\) は任意の \(Y \qgt A\) について
+  \(\p{m_A\p{Y}, s_A\p{Y}} \ne \p{0, 0}\) を
+  満たしているとき、\textbf{飽和}しているといわれる。
+
+  特に、飽和局所密なコンテナは飽和している。
+
+  なお、\(m,\,s\) のいずれかが狭義単調である場合は
+  すべてのコンテナが飽和していることになる。
+\end{definition}
+
+\begin{proposition}
+  \(i = 1, \dots, K\) に対し、
+  \(\bD_{i-1}\) は
+  \(\bd_X\p{\bD_i}\) を最小化する飽和した \(X \qlt \bD_i\) のうちで
+  束で最小のものである。
+\end{proposition}
+
+\begin{proposition}
+  \(i = 0, \dots, K-1\) に対し、
+  \(\bD_{i+1}\) は
+  \(\bd_{\bD_i}\p{Y}\) を最大化する \(Y \qge \bD_i\) のうちで
+  束で最大のものである。
+\end{proposition}
+
+\begin{corollary}
+  \(\bD_1\) は、密度最大のコンテナのうち、束で最大のものである。
+\end{corollary}
+
+\begin{proposition}
+  \(0 \le a < b \le K\) が与えられているとき、
+  \(\alpha \defeq d_{\bD_a}\p{\bD_b},\
+    \bD_c \defeq \Delta^*\p{\alpha}\) とすると、
+  \(a + 1 < b\) ならば \(a < c < b\) が、
+  \(a + 1 = b\) ならば \(c = b\) が成立する。
+\end{proposition}
+
+\subsection{質量とサイズに狭義単調凸・凹関数を被せた場合}
+
+局所密分解のために導入した制約を満たす質量関数とサイズ関数 \(m, s\)
+が与えられているとき、
+任意の狭義単調凸関数 \(f : \RR \to \RR\) と
+狭義単調凹関数 \(g : \RR \to \RR\)
+（ただし \(f\p{0} = g\p{0} = 0\) とする）について
+\(m'\p{X} \defeq f\p{m\p{X}},\ s'\p{X} \defeq g\p{s\p{X}}\)
+としたときに
+\(m',\ s'\) も質量関数、サイズ関数として制約を満たしている。
+
+\(m, s\) について
+\(d_X\p{Y},\ \delta_\alpha\p{X},\ \Delta_*\p{X},\
+  D_i,\ K\)
+といった記法を導入するが、
+\(m', s'\) については
+\(d'_X\p{Y},\ \delta'_\alpha\p{X},\ \Delta'_*\p{\alpha},\
+  D'_i,\ K'\)
+と書くことにしよう（ここで \('\) が微分の意味ではないことに注意）。
+
+実は以下の性質が成り立つ。
+
+\begin{proposition}
+  \(\c{D'_0, D'_1, \dots, D'_{K'}}
+    \sub \c{D_0, D_1, \dots, D_K}\)。
+\end{proposition}
+\begin{proof}
+  任意の \(\alpha \in \RR_{\ge 0}\) を取り、
+  \(D' \defeq \Delta'_*\p{\alpha}\) としよう。
+  これが \(m, s\) について局所密であることを示せばよい。
+  関数 \(f\p{x}\) の \(x = m\p{D'}\) での接線（の一つ）を
+  \(ax + b\) としよう。
+  また、関数 \(g\p{x}\) の \(x = s\p{X}\) での接線（の一つ）を
+  \(cx + d\) としよう。
+  このとき、
+  \(\delta'_\alpha\p{X} = f\p{m\p{X}} - \alpha g\p{s\p{X}}
+    \ge a \cd m\p{X} + b - c\alpha \cd s\p{X} - d\alpha
+    = a \delta_{\frac{c}{a}\alpha}\p{X} + b - d\alpha\)
+  であるから、
+  \(D' = \Delta_*\p{\frac{c}{a}\alpha}\) でなくてはならない。
+  ゆえに、\(D'\) は \(m, s\) について局所密である。
+\end{proof}
+
+ゆえに、\(D_0, \dots, D_K\) が求まっている状況下で
+\(D'_0, \dots, D'_{K'}\) を求めるには、
+\cref{locally-dense-decrement}に基づくと、
+以下の要領で求めればよい。
+
+\begin{itemize}
+  \item
+    \(\top\) は \(m', s'\) についても局所密であるから、
+    結果のリストに \(\top\) を加え、\(D' \defeq \top\) とする。
+  \item
+    以下を \(D' = \bot\) となるまで繰り返す。
+    \begin{itemize}
+      \item
+        \(D_i \qlt D'\) なる \(D_i\) で、
+        \(d'_{D_i}\p{D'}\) が一番小さくなるもののうち、
+        束で最小になるものを新たな \(D'\) とし、
+        これを結果のリストの先頭に加える。
+    \end{itemize}
+  \item
+    最終的に得られるリストは、
+    \(D'_0, \dots, D'_{K'}\) のリストと一致する。
+\end{itemize}
+
+\section{局所密分解の厳密アルゴリズム}
+
+\citet{tatti-gionis} で述べられているとおり、
+\cref{alpha-medium}を使うと、
+局所密分解について以下のアルゴリズムが考えられる。
+
+ただし、計算量の改善のため
+\(\Delta_*\p{\alpha,A,B} \defeq
+  \argmax_{A \qle X \qle B} \delta_\alpha\p{X}\)
+（この \(\argmax\) は同点のものについて束で最小のものを取る）とした。
+ここを \(\Delta_*\p{\alpha}\) としても
+以下のアルゴリズムで得られる \(X\) は変化しない。
+
+\begin{algorithm}[H]
+  \caption{\textsc{ExactLD} および \textsc{ExactLDBody}}
+  \begin{algorithmic}
+    \Ensure
+      \(\bot, \top\) を除くすべての局所密なコンテナを出力する。
+    \Function{ExactLD}{{}}
+      \State \Call{ExactLDBody}{$\bot, \top$};
+    \EndFunction
+
+    \Require
+      \(A \qlt B\) であり、\(A, B\) は局所密である。
+    \Ensure
+      \(A \qlt X \qlt B\) なるすべての
+      局所密な \(X\) を束で小さい順に一度ずつ出力し、停止する。
+    \Function{ExactLDBody}{$A, B$}
+      \State
+        \(\alpha \ot d_A\p{B}\);
+      \State
+        \(C \ot \Delta_*\p{\alpha,A,B}\);
+      \If{\(A \qlt C\)}
+        \State
+          \Call{ExactLDBody}{$A, C$};
+        \State
+          \textbf{output} \(C\);
+        \State
+          \Call{ExactLDBody}{$C, B$};
+      \EndIf
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+さて、問題は、
+\(\Delta_*\p{\alpha,A,B}\) を効率良く計算できるかどうかである。
+なお、
+\(A \qlt B,\
+  \alpha > 0,\
+  \Delta_*\p{\alpha,A,B} = \Delta_*\p{\alpha}\)
+の場合のみ考えればよい。
+また、計算量解析において、
+\textsc{ExactLDBody} の呼び出しの最大深さを \(L\) としよう。
+
+まず、\nameref{general-case}について述べ、
+次に具体例（\nameref{edge}、\nameref{pattern}）
+について説明する。
+
+\subsection{定義域が有限集合の冪集合である場合の一般論}
+\label{general-case}
+
+\(\Delta_*\p{\alpha,A,B}
+= \argmax_{A \qle X \qle B} \delta_\alpha\p{X}
+= \argmin_{A \qle X \qle B} \p{-\delta_\alpha\p{X}}\) であるから、
+これは（\(A \qle X \qle B\) の部分束上の）
+劣モジュラ関数の最小化問題に帰着される。
+
+劣モジュラ関数の始域が
+有限集合 \(U\) の冪集合のなす束である場合、
+劣モジュラ関数の計算量と \(\t{U}\) についての多項式時間で
+劣モジュラ関数の最小化問題が解けることが知られている
+（\citet{iwata-fleischer-fujishige}）。
+ゆえに、\(\L\) が \(U\) の冪集合として考えられる場合、
+\textsc{ExactLDBody} の呼び出し回数は \(O\p{\t{U}}\) であるから、
+\textsc{ExactLD} が全体で
+\(\delta_\alpha\p{X}\) の計算時間と \(\t{U}\) についての
+多項式時間で動作することが保証される。
+
+\subsection{辺の密度}\label{edge}
+
+これは \citet{tatti-gionis} で述べられている内容と概ね同じである。
+ただし、計算量解析だけはより詳しくおこなっている。
+
+頂点に正の費用、辺に正の重みがついている
+有限無向グラフ \(G = \p{V, E}\) を考える。
+ただし、次数が \(0\) の頂点は存在しないとする。
+頂点の費用関数を \(c\)、辺の重み関数を \(w\) とする。
+頂点の集合 \(W \sub V\)、辺の集合 \(F \sub E\) に対しても
+費用、重みの総和として \(c\p{W},\,w\p{F}\) を使うことにする。
+\(E\p{X, Y} \defeq \set{\p{u, v} \in E}{u \in X, v \in Y},\
+  E\p{X} \defeq E\p{X, X},\
+  \deg_w\p{v; X} \defeq w\p{\set{\p{u, v} \in E}{u \in X}}\)
+と定義する。
+
+さて、\(\L\) は \(V\) の冪集合として、
+\(m\p{X} \defeq w\p{E\p{X}},\ s\p{X} \defeq c\p{X}\)
+としよう。
+これは局所密分解ができる状況である。
+
+このとき、\(X \sub B\) のもとで \(\delta_\alpha\p{X}\) の最大化は
+\(2w\p{E\p{B}} - 2\delta_\alpha\p{X}
+= 2w\p{E\p{B}} - 2w\p{E\p{X}} + 2\alpha c\p{X}
+= w\p{E\p{X, B - X}}
+  + 2\alpha c\p{X} + \sum_{v \in B - X} \deg_w\p{v; B}\)
+の最小化と同値であるから、
+以下のようにして最小カット問題に帰着できる。
+\footnote{
+  この帰着は \citet{goldberg} によるものである。
+}
+
+\begin{algorithm}[H]
+  \caption{辺の密度に対する $\Delta_*\p{\alpha,A,B}$（改善前）}
+  \begin{algorithmic}
+    \Require
+      \(A \subx B \sub V,\
+        \alpha > 0,\
+        \Delta_*\p{\alpha,A,B} = \Delta_*\p{\alpha}\)。
+    \Function{$\Delta_*$}{$\alpha,A,B$}
+      \State
+        \begin{algotabular}
+          辺に非負の重みがついた無向グラフ
+          \(G' = \p{\c{s, t} + B,\,E'}\) で、
+          辺集合と各辺の重みが
+          \begin{itemize}
+            \item
+              \(E\p{B}\) の要素に対応する辺
+              （容量は \(w\) を引き継ぐ）。
+            \item
+              \(s\) と各 \(v \in B\) の間の容量
+              \(\deg_w\p{v; B}\) の辺。
+            \item
+              \(t\) と各 \(v \in B\) の間の容量
+              \(2\alpha c\p{v}\) の辺。
+          \end{itemize}
+          により与えられるものを構成する。
+        \end{algotabular}
+      \State
+        \begin{algotabular}
+          \(G'\) において
+          （\(s\) を始点、\(t\) を終点とする）最小カット問題を解き、
+          最小カットを与える（\(s\) 側の）点集合で
+          包含関係で最大のもの \(C \sub B\) を出力する
+          （そのためには最大フローを構成して、
+          残余グラフで \(s\) から辿り着ける頂点全体の集合を
+          \(C\) とすればよい）。
+        \end{algotabular}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+最小カットを与える集合として \(A\) を含むものしか考えないから、
+計算量を削減するために以下のような工夫ができる。
+\footnote{
+  この改善法は \citet{tatti-gionis} の手法である。
+}
+以下、\(B - A\) を \(B_A\) と略記することにする。
+
+\begin{algorithm}[H]
+  \caption{辺の密度に対する $\Delta_*\p{\alpha,A,B}$（改善後）}
+  \begin{algorithmic}
+    \Require
+      \(A \subx B \sub V,\
+        \alpha > 0,\
+        \Delta_*\p{\alpha,A,B} = \Delta_*\p{\alpha}\)。
+    \Function{$\Delta_*$}{$\alpha,A,B$}
+      \State
+        \begin{algotabular}
+          辺に非負の重みがついた無向グラフ
+          \(G' = \p{\c{s, t} + B_A,\,E'}\) で、
+          辺集合と各辺の重みが
+          \begin{itemize}
+            \item
+              \(E\p{B_A}\) の要素に対応する辺
+              （容量は \(w\) を引き継ぐ）。
+            \item
+              \(s\) と各 \(v \in B_A\) の間の容量
+              \(\deg_w\p{v; A} + \deg_w\p{v; B}\) の辺。
+            \item
+              \(t\) と各 \(v \in B_A\) の間の容量
+              \(2\alpha c\p{v}\) の辺。
+          \end{itemize}
+          により与えられるものを構成する。
+        \end{algotabular}
+      \State
+        \begin{algotabular}
+          \(G'\) において最小カット問題を解き、
+          最小カットを与える（\(s\) 側の）点集合で
+          包含関係で最小のものを \(C' \sub B_A\) として、
+          \(A + C'\) を出力する。
+        \end{algotabular}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\(G'\) は頂点数 \(O\p{\t{B_A}}\)、
+辺数 \(O\p{\t{E\p{B_A}} + \t{B_A}}\) である。
+一般にグラフの最大フロー最小カットは \citet{orlin} より
+\(O\p{\text{(頂点数)(辺数)}}\) で解けることが知られているから、
+ここでの最大フロー最小カットは
+\(O\p[1]{\t{B_A} \p{\t{E\p{B_A}} + \t{B_A}}}\) で動く。
+
+全体で効率的に計算するには、
+\textsc{ExactLDBody} における \(d_A\p{B}\) の計算と、
+\(\Delta_*\p{\alpha,A,B}\) における
+\(\deg_w\p{v; A} + \deg_w\p{v; B}\) の計算を工夫することが重要である。
+具体的に言えば、
+常に \(\deg_w\p{v; A}\) と \(\deg_w\p{v; B}\) を持ち回り、
+\(A\) が \(C\) に、あるいは \(B\) が \(C\) に変わったときに
+差分を上手く計算するようにする。
+そうすると、\textsc{ExactLD} 全体では
+\(O\p[1]{L \t{V} \p{\t{E} + \t{V}}}\) で動くことが保証される。
+\footnote{
+  \citet{tatti-gionis} では
+  \(L\) というパラメータを導入しておらず、
+  \(K\) もオーダー表記には用いていないので、
+  \(O\p[1]{\t{V}^2 \p{\t{E} + \t{V}}}\) で押さえられるという
+  控えめな解析となっている。
+}
+現実のグラフでは最大フロー最小カットは理論保証から期待される速度よりも
+ずっと速く動作することが多い。
+こうした考察から、
+大規模なグラフに対しても通常は現実的な速さで動作すると考えられ、
+実際そのような実験結果が得られている。
+詳しくは \citet{tatti-gionis} の表1、あるいは
+ここでの実験結果の\cref{results}を参照してほしい。
+
+\subsection{パターンの密度}\label{pattern}
+
+辺の密度の場合を一般化したものである。
+
+点の有限\kenten{多重集合} \(V\) を取る。
+各点 \(x \in V\) に対し、
+\(x\) の \(V\) での重複度を \(n\) として、
+\(i = 1, \dots, n\) について
+\(x\) を \(i\) 個得たときの正の費用 \(c\p{x^i}\) が与えられている。
+\(c\p{x^i}\) は \(i\) について単調であるとする。
+これをもとに、一般に点の多重集合 \(W \sub V\) に対して
+各種類の要素の費用の総和として \(c\p{W}\) を考える。
+また、\textbf{パターン}の有限集合 \(\Pi\) があり、
+各パターン \(\pi\) には
+\kenten{任意サイズ}の点の多重集合 \(P\p{\pi} \sub V\) と
+正の重み \(w\p{\pi}\) が紐付けられている。
+ただし、\(V = \Sor_{\pi \in \Pi} P\p{\pi}\) が成立するとする。
+\(X \sub V\) に対して
+\(\Pi\p{X} \defeq \set{\pi \in \Pi}{P\p{\pi} \sub X}\)
+と書くことにしよう。
+パターンの集合 \(\Xi \sub \Pi\) に対しても
+重みの総和として \(w\p{\Xi}\) を使うことにする。
+
+ここで、
+\(\L\) は \(V\) の冪集合として、\(X \sub V\) に対し
+\(m\p{X} \defeq w\p{\Pi\p{X}},\
+  s\p{X} \defeq c\p{X}\) と定義したときを考えよう。
+これは局所密分解ができる状況である。
+
+以下の方法で多重集合 \(X\) を
+同じサイズの集合 \(X^\dagger\) に変換することにしよう：
+\(x \in X\) の多重度が \(n\) であるとき、
+\(X^\dagger\) には \(x^1, \dots, x^n\) を入れる。
+
+\(X \sub B\) のもとで、\(\delta_\alpha\p{X}\) の最大化は
+\(m\p{B} - \delta_\alpha\p{X} = m_X\p{B} + \alpha c\p{X}\)
+の最小化と同値であるので、
+以下のようにして最小カットに帰着できる。
+\footnote{
+  この帰着は \citet{tsourakakis} のアルゴリズム 6
+  （\(k\)-クリークの密度についての手法）を参考にして考案したが、
+  \(s\) から各 \(\pi\) への辺を設けるところが異なる。
+  また、多重集合についての扱いを独自に加えた。
+
+  1点あるいは2点のパターンについては
+  パターンに対応する頂点を設けない手法がある
+  （辺の密度が2点からなるパターンの密度であることに注意）。
+  ただ、ここでそれを明示的に書くと記述が複雑になるので、省略した。
+}
+
+\begin{algorithm}[H]
+  \caption{パターンの密度に対する $\Delta_*\p{\alpha,A,B}$（改善前）}
+  \begin{algorithmic}
+    \Require
+      \(A \subx B \sub V,\
+        \alpha > 0,\
+        \Delta_*\p{\alpha,A,B} = \Delta_*\p{\alpha}\)。
+    \Function{$\Delta_*$}{$\alpha,A,B$}
+      \State
+        \begin{algotabular}
+          辺に非負の重みがついた有向グラフ
+          \(G = \p{\c{s, t} + B^\dagger + \Pi\p{B},\,E}\) で、
+          辺集合と各辺の重みが
+          \begin{itemize}
+            \item
+              各 \(\pi \in \Pi\p{B}\) に対して、
+              \(\pi\) から \(P\p{\pi}\) の各点への容量無限大の辺と、
+              \(s\) から \(\pi\) への容量 \(w\p{\pi}\) の辺。
+            \item
+              各 \(x^i, x^{i+1} \in B^\dagger\) について、
+              \(x^{i+1}\) から \(x^i\) への容量無限大の辺。
+            \item
+              \(t\) から各 \(x^i \in B^\dagger\) への
+              容量 \(\alpha c\p{x^i}\) の辺。
+          \end{itemize}
+          により与えられるものを構成する。
+        \end{algotabular}
+      \State
+        \begin{algotabular}
+          \(G\) において最小カット問題を解き、
+          最小カットを与える点集合のうち包含関係で最小のものを
+          \(C'\) として、
+          \(C' \sand B\) を出力する。
+        \end{algotabular}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+最小カットにおいては各 \(\pi\) について
+\(p \in P\p{\pi}\) がみな \(s\) 側にあることと
+\(\pi\) が \(s\) 側にあることが同値である、
+ということが重要である。
+
+最小カットを与える集合として \(A\) を含むものしか考えないから、
+計算量を削減するために、
+辺の密度の場合と同様、以下のような工夫ができる。
+\footnote{
+  先程の \citet{tatti-gionis} の改善法を参考にして自分で考えた。
+}
+
+ただし、\(B - A\) を \(B_A\) と略記し、
+\(\Pi_X\p{Y} \defeq \Pi\p{Y} - \Pi\p{X}\) とした。
+
+\begin{algorithm}[H]
+  \caption{パターンの密度に対する $\Delta_*\p{\alpha,A,B}$（改善後）}
+  \begin{algorithmic}
+    \Require
+      \(A \subx B \sub V,\
+        \alpha > 0,\
+        \Delta_*\p{\alpha,A,B} = \Delta_*\p{\alpha}\)。
+    \Function{$\Delta_*$}{$\alpha,A,B$}
+      \State
+        \begin{algotabular}
+          辺に非負の重みがついた有向グラフ
+          \(G = \p{\c{s, t} + B_A^\dagger + \Pi_A\p{B},\,E}\) で、
+          辺集合と各辺の重みが
+          \begin{itemize}
+            \item
+              各 \(\pi \in \Pi_A\p{B}\) に対して、
+              \(\pi\) から \(Q\) の各点への容量無限大の辺と、
+              \(s\) から \(\pi\) への容量 \(w\p{\pi}\) の辺。
+            \item
+              各 \(x^i, x^{i+1} \in B^\dagger\) について、
+              \(x^{i+1}\) から \(x^i\) への容量無限大の辺。
+            \item
+              \(t\) から各 \(x^i \in B_A\) への
+              容量 \(\alpha c\p{x}\) の辺。
+          \end{itemize}
+          により与えられるものを構成する。
+        \end{algotabular}
+      \State
+        \begin{algotabular}
+          \(G\) において最小カット問題を解き、
+          最小カットを与える点集合のうち包含関係で最小のものを
+          \(C'\) として、
+          \(A + \p{C' \sand B_A}\) を出力する。
+        \end{algotabular}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\(\Pi^\dagger_X\p{Y} \defeq \set{\p{\pi, p}}
+  {\pi \in \Pi_X\p{Y},\ p \in \p{P\p{\pi}}^\dagger}\) とすると、
+ここでの \(G\) は頂点数 \(O\p{\t{\Pi_A\p{B}} + \t{B_A}}\)、
+辺数 \(O\p{\t{\Pi^\dagger_A\p{B}} + \t{B_A}}\) のグラフであるから、
+最小カットは
+\(O\p[1]{\t{\Pi_A\p{B}} + \p{\t{B_A}}
+  \p{\t{\Pi^\dagger_A\p{B}} + \t{B_A}}}\)
+で動くことがわかる。
+
+効率的に計算するには、
+\textsc{ExactLDBody} における \(d_A\p{B}\) の計算を工夫すれば良い。
+そうすると、\textsc{ExactLD} 全体では
+\(O\p[1]{L \p{\t{\Pi} + \t{V}} \p{\t{\Pi^\dagger} + \t{V}}}\)
+で動くことが保証される
+（\(\Pi^\dagger \defeq \Pi^\dagger_\emp\p{V}\) とした）。
+
+\section{実験}
+
+無向グラフの辺の密度について局所密分解を行うアルゴリズムを C++ で書いた。
+様々なグラフについて \(L\) の大きさを確かめることが主な目的である。
+最大フロー最小カット部分は Dinic のアルゴリズムで書いているが、
+それなりに速く動作する。
+ソースコードは src というフォルダに置いた。
+
+Stanford Large Network Dataset Collection
+から取ったグラフのデータについて
+東京大学理学部情報科学科の CSC クラスタ
+（CPU は Intel\textregistered{} Xeon\textregistered{}
+CPU E5-2687W v3 3.10GHz である）
+において実験をおこなった。
+出力は out というフォルダに置いた。
+データ本体は容量が大きかったので置かなかった。
+
+実験の結果は以下の通り。
+規模の大きいグラフに対しても現実的な時間で動いていることがわかる。
+また、\(L\) はかなり小さいということがわかる。
+\begin{table}[H]
+  \begin{center}
+    \caption{実験結果}\label{results}
+    \begin{tabular}{|c|r|r|r|r|r|}
+      \hline
+      グラフ名 &
+        \(\t{V}\) & \(\t{E}\) & \(K\) & \(L\) & 実行時間 \\
+      \hline
+      ca-GrQc &
+        5,247 & 28,980 & 108 & 10 & 0.149 s \\
+      com-amazon &
+        334,863 & 925,872 & 1,256 & 14 & 44.715 s \\
+      com-youtube &
+        1,134,890 & 2,987,624 & 918 & 14 & 50.535 s \\
+      as-skitter &
+        1,696,415 & 11,095,298 & 3,501 & 16 & 362.862 s \\
+      com-lj &
+        3,997,962 & 34,681,189 & 8,122 & 17 & 3170.55 s \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+
+\bibliographystyle{agsm}
+\bibliography{summary}
+
+\end{document}
