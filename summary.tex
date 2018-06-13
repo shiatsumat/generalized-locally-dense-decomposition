@@ -839,9 +839,9 @@
     \Function{$\Delta_*$}{$\alpha,A,B$}
       \State
         \begin{algotabular}
-          辺に非負の重みがついた無向グラフ
+          辺に非負の容量がついた有向グラフ
           \(G' = \p{\c{s, t} + B,\,E'}\) で、
-          辺集合と各辺の重みが
+          辺集合と各辺の容量が
           \begin{itemize}
             \item
               \(E\p{B}\) の要素に対応する辺
@@ -886,9 +886,9 @@
     \Function{$\Delta_*$}{$\alpha,A,B$}
       \State
         \begin{algotabular}
-          辺に非負の重みがついた無向グラフ
+          辺に非負の容量がついた有向グラフ
           \(G' = \p{\c{s, t} + B_A,\,E'}\) で、
-          辺集合と各辺の重みが
+          辺集合と各辺の容量が
           \begin{itemize}
             \item
               \(E\p{B_A}\) の要素に対応する辺
@@ -1005,13 +1005,14 @@
     \Function{$\Delta_*$}{$\alpha,A,B$}
       \State
         \begin{algotabular}
-          辺に非負の重みがついた有向グラフ
+          辺に正の容量がついた有向グラフ
           \(G = \p{\c{s, t} + B^\dagger + \Pi\p{B},\,E}\) で、
-          辺集合と各辺の重みが
+          辺集合と各辺の容量が
           \begin{itemize}
             \item
               各 \(\pi \in \Pi\p{B}\) に対して、
-              \(\pi\) から \(P\p{\pi}\) の各点への容量無限大の辺と、
+              \(\pi\) から \(\p{P\p{\pi}}^\dagger\) の各点への
+              容量無限大の辺と、
               \(s\) から \(\pi\) への容量 \(w\p{\pi}\) の辺。
             \item
               各 \(x^i, x^{i+1} \in B^\dagger\) について、
@@ -1058,19 +1059,20 @@
     \Function{$\Delta_*$}{$\alpha,A,B$}
       \State
         \begin{algotabular}
-          辺に非負の重みがついた有向グラフ
-          \(G = \p{\c{s, t} + B_A^\dagger + \Pi_A\p{B},\,E}\) で、
-          辺集合と各辺の重みが
+          辺に正の容量がついた有向グラフ
+          \(G = \p{\c{s, t} + \p{B_A}^\dagger + \Pi_A\p{B},\,E}\) で、
+          辺集合と各辺の容量が
           \begin{itemize}
             \item
               各 \(\pi \in \Pi_A\p{B}\) に対して、
-              \(\pi\) から \(Q\) の各点への容量無限大の辺と、
+              \(Q = P\p{\pi} \diff A\) として
+              \(\pi\) から \(Q^\dagger\) の各点への容量無限大の辺と、
               \(s\) から \(\pi\) への容量 \(w\p{\pi}\) の辺。
             \item
-              各 \(x^i, x^{i+1} \in B^\dagger\) について、
+              各 \(x^i, x^{i+1} \in \p{B_A}^\dagger\) について、
               \(x^{i+1}\) から \(x^i\) への容量無限大の辺。
             \item
-              \(t\) から各 \(x^i \in B_A\) への
+              \(t\) から各 \(x^i \in \p{B_A}^\dagger\) への
               容量 \(\alpha c\p{x}\) の辺。
           \end{itemize}
           により与えられるものを構成する。
