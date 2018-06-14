@@ -671,7 +671,7 @@
 \(m', s'\) については
 \(d'_X\p{Y},\ \delta'_\alpha\p{X},\ \Delta'_*\p{\alpha},\
   D'_i,\ K'\)
-と書くことにしよう（ここで \('\) が微分の意味ではないことに注意）。
+と書くことにしよう。
 
 実は以下の性質が成り立つ。
 
@@ -685,14 +685,18 @@
   これが \(m, s\) について局所密であることを示せばよい。
   関数 \(f\p{x}\) の \(x = m\p{D'}\) での接線（の一つ）を
   \(ax + b\) としよう。
-  また、関数 \(g\p{x}\) の \(x = s\p{X}\) での接線（の一つ）を
+  また、関数 \(g\p{x}\) の \(x = s\p{D'}\) での接線（の一つ）を
   \(cx + d\) としよう。
-  このとき、
+  このとき、\(a > 0\) に注意すると
   \(\delta'_\alpha\p{X} = f\p{m\p{X}} - \alpha g\p{s\p{X}}
     \ge a \cd m\p{X} + b - c\alpha \cd s\p{X} - d\alpha
     = a \delta_{\frac{c}{a}\alpha}\p{X} + b - d\alpha\)
-  であるから、
-  \(D' = \Delta_*\p{\frac{c}{a}\alpha}\) でなくてはならない。
+  であり、
+  \(X = D'\) のとき等号が成立するから、
+  \(D' = \Delta'_*\p{\alpha}\) を踏まえると
+  \(D'\) は \(\delta_{\frac{c}{a}\alpha}\p{X}\) を最大化する
+  \(X\) の中で束で最小である、
+  すなわち \(D' = \Delta_*\p{\frac{c}{a}\alpha}\) である。
   ゆえに、\(D'\) は \(m, s\) について局所密である。
 \end{proof}
 
@@ -1065,8 +1069,8 @@
           \begin{itemize}
             \item
               各 \(\pi \in \Pi_A\p{B}\) に対して、
-              \(Q = P\p{\pi} \diff A\) として
-              \(\pi\) から \(Q^\dagger\) の各点への容量無限大の辺と、
+              \(\pi\) から \(\p{P\p{\pi} \diff A}^\dagger\) の各点への
+              容量無限大の辺と、
               \(s\) から \(\pi\) への容量 \(w\p{\pi}\) の辺。
             \item
               各 \(x^i, x^{i+1} \in \p{B_A}^\dagger\) について、
